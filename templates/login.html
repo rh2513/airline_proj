@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">AGENT LOGIN</h5>
+                    <form method="POST" action="login" class="form-signin">
+                        <div class="form-label-group">
+                            <label for="username">Username: </label>
+                            <input type="text" class="form-control" name="username" value="" required autofocus>
+                        </div>
+                        <div class="form-label-group">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" name="password" value="" required>
+                        </div>
+                        </br>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
+                            value="Login">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">CUSTOMER LOGIN</h5>
+                    <form method="POST" action="login" class="form-signin">
+                        <div class="form-label-group">
+                            <label for="username">Username: </label>
+                            <input type="text" class="form-control" name="username" value="" required autofocus>
+                        </div>
+                        <div class="form-label-group">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" name="password" value="" required>
+                        </div>
+                        </br>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
+                            value="Login">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">STAFF LOGIN</h5>
+                    <form method="POST" action="login" class="form-signin">
+                        <div class="form-label-group">
+                            <label for="username">Username: </label>
+                            <input type="text" class="form-control" name="username" value="" required autofocus>
+                        </div>
+                        <div class="form-label-group">
+                            <label for="password">Password:</label>
+                            <input type="password" class="form-control" name="password" value="" required>
+                        </div>
+                        </br>
+                        <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
+                            value="Login">Login</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
