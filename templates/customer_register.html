@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+    <div class="card card-signin my-5">
+        <div class="card-body">
+            <h5 class="card-title text-center">CUSTOMER SIGN UP</h5>
+            <form method="POST" action="/c_register" class="form-signin">
+                <input class="form-control" type="text" name="building number" placeholder="Building number" required /></br>
+                <input class="form-control" type="text" name="street" placeholder="Street" required /> </br>
+                <input class="form-control" type="text" name="city" placeholder="City" required /> </br>
+                <input class="form-control" type="text" name="state" placeholder="State" required /> </br>
+                <input class="form-control" type="text" name="phone number" placeholder="Phone number" required /> </br>
+                <input class="form-control" type="text" name="passport number" placeholder="Passport number" required /></br>
+                <input class="form-control" type="text" name="passport expiration" placeholder="Passport expiration" required /> </br>
+                <input class="form-control" type="text" name="passport country" placeholder="Passport country" required /> </br>
+                <input class="form-control" type="text" name="date of birth" placeholder="DOB" required /> </br>
+                </br>
+                <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
+                    value="Register">Register</button>
+                {% if error %}
+                <p class="error"><strong>Error:</strong> Please make sure all values are valid.</p>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+<a href="/register">Go back</a>
+
+{% endblock %}
