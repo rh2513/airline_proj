@@ -16,13 +16,22 @@
                 aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarsExample02">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/home">HOME</a>
                     </li>
                 </ul>
+                {% if session['email'] %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="nav-item">
+                        <a class="nav-link">Welcome {{session['email']}}!</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+                {% else %}
                 <ul class="nav navbar-nav navbar-right">
                     <li class="nav-item">
                         <a class="nav-link" href="/login">Login</a>
@@ -31,13 +40,23 @@
                         <a class="nav-link" href="/register">Register</a>
                     </li>
                 </ul>
+
+                {% endif %}
             </div>
         </nav>
 
         <br>
-        {% block content %}{% endblock %}
+
+        {% with messages = get_flashed_messages() %}
+
+        {% block content %}
+        {% endblock %}
+
+        {% endwith %}
+        {% block body %}
+        {% endblock %}
         <br>
-        
+
     </div>
     <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
