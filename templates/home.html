@@ -2,12 +2,26 @@
 {% block content %}
 
 {% if not message %}
-<form method="POST" action="/search" class="form-inline active-purple-4">
-    <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Search" aria-label="Search">
-    <button class="btn"> Search </button>
-</form>
+<h1>Flight Tracker</h1>
 
-<a href="/info">Flight Information</a></br>
+<div class="jumbotron">
+    <h3>Search Flight</h3>
+    <form method="POST" action="/search-flight" class="form-inline active-purple-4">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date" aria-label="Search">
+        <button class="btn"> Search </button>
+    </form>
+    <br />
+    <h3>Search Status</h3>
+    <form method="POST" action="/search-route" class="form-inline active-purple-4">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Flight Number" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Date" aria-label="Search">
+        <button class="btn"> Search </button>
+    </form>
+</div>
+
 {% endif %}
 
 {% endblock %}Í

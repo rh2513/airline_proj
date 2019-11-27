@@ -32,13 +32,8 @@ def register():
 def agent_register():
     return render_template('agent_register.html')
 
-
-@app.route('/staff_register')
-def staff_register():
-    return render_template('staff_register.html')
-
-# Authenticates the register
-@app.route('/customer_register', methods=['GET', 'POST'])
+# CUSTOMER AUTHENTICATION (SIGNUP / LOGIN)
+@app.route('/customer-register', methods=['GET', 'POST'])
 def customer_register():
     if request.method == 'POST':
         name = request.form['name']
@@ -86,9 +81,8 @@ def customer_register():
 
     return render_template('customer_register.html')
 
-# Authenticates the login
-@app.route('/login', methods=['GET','POST'])
-def loginAuth():
+@app.route('/customer-login', methods=['GET','POST'])
+def customer_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -102,6 +96,72 @@ def loginAuth():
 
         if(data):
             session['email'] = email
+            return redirect(url_for('home'))
+        else:
+            error = 'Invalid login or username'
+            return redirect(url_for('login', error=error))
+
+    return render_template('login.html')
+
+
+# STAFF AUTHENTICATION (SIGNUP / LOGIN)
+@app.route('/staff-register', methods=['GET', 'POST'])
+def staff_register():
+    if request.method == 'POST':
+        username = request.form['username']
+        first_name = request.form['first name']
+        last_name = request.form['last name']
+        date_of_birth = request.form['date of birth']
+        airline_name = request.form['airline name']
+        password = request.form['password']
+        password_confirmation = request.form['password confirmation']
+
+        if password != password_confirmation:
+            flash("Password must match")
+            return redirect(url_for('customer_register'))
+        if not len(password) >= 4:
+            flash("Password length must be at least 4 characters")
+            return redirect(url_for('customer_register'))
+
+        cursor = conn.cursor()
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
+        cursor.execute(query.format(username))
+        data = cursor.fetchone()
+        error = None
+
+        if(data):
+            error = "This user already exists"
+            return redirect(url_for('staff_register', error=error))
+        else:
+            ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+            cursor.execute(ins.format(
+               username,
+               password,
+               first_name, last_name,
+               date_of_birth,
+               airline_name))
+            conn.commit()
+            cursor.close()
+            flash("You are logged in")
+            return redirect(url_for('home'))
+
+    return render_template('staff_register.html')
+
+@app.route('/staff-login', methods=['GET','POST'])
+def staff_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        cursor = conn.cursor()
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\'"
+        cursor.execute(query.format(username, password))
+        data = cursor.fetchone()
+        cursor.close()
+        error = None
+
+        if(data):
+            session['username'] = username
             return redirect(url_for('home'))
         else:
             error = 'Invalid login or username'
