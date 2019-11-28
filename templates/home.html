@@ -1,23 +1,47 @@
 {% extends "base.html" %}
 {% block content %}
 
-{% if not message %}
+{% if "staff" in session['type'] %}
+<div class="sidenav">
+    <a href="my-flight">View My flights</a>
+    <a href="new-flight">Create new flights</a>
+    <a href="status">Change Status of flights</a>
+    <a href="add-airplane">Add airplane in the system</a>
+    <a href="add-airport">Add new airport in the system</a>
+    <a href="booking-agent">View all the booking agents</a>
+    <a href="customer">View frequent customers</a>
+    <a href="report">View reports</a>
+    <a href="revenue">Comparison of Revenue earned</a>
+    <a href="top-destination">View Top destinations</a>
+</div>
+
+
+{% elif "agent" in session['type'] %}
+<p>AGENT</p>
+
+{% else %}
 <h1>Flight Tracker</h1>
 
 <div class="jumbotron">
     <h3>Search Flight</h3>
     <form method="POST" action="/search-flight" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Airport" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Airport" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Airport"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Airport"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date"
+            aria-label="Search">
         <button class="btn"> Search </button>
     </form>
     <br />
     <h3>Search Status</h3>
     <form method="POST" action="/search-route" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Flight Number" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Date" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Flight Number"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Date"
+            aria-label="Search">
         <button class="btn"> Search </button>
     </form>
 </div>
