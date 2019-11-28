@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>VIEW FLIGHTS</h1>
+<div class="jumbotron">
+    <h3>Search Status</h3>
+    <form method="POST" action="/search-route" class="form-inline active-purple-4">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Flight Number"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date"
+            aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Date"
+            aria-label="Search">
+        <button class="btn"> Search </button>
+    </form>
+</div>
+
+<div>
+    {% for key, segment in segment_details.items() %}
+    <tr>
+        <td>{{ key }}</td>
+        <td>{{ segment }}</td>
+        <button>edit</button>
+    </tr>
+    {% endfor %}
+</div>
+
+{% endblock %}

@@ -5,16 +5,20 @@
     <div class="card card-signin my-5">
         <div class="card-body">
             <h5 class="card-title text-center">AGENT SIGN UP</h5>
+
+            {% if error %}
+            <p class="alert alert-danger"><strong>Error:</strong> {{error}} </p>
+            {% endif %}
+            
             <form method="POST" action="agent-register" class="form-signin">
                 <input class="form-control" type="text" name="email" placeholder="Email" required /></br>
                 <input class="form-control" type="password" name="password" placeholder="Password" required /></br>
-                <input class="form-control" type="password" name="password confirmation" placeholder="Password Confirmation" required /></br>
-                <input class="form-control" type="text" name="booking agent id" placeholder="Booking Agent Id" required /> </br>
+                <input class="form-control" type="password" name="password confirmation"
+                    placeholder="Password Confirmation" required /></br>
+                <input class="form-control" type="text" name="booking agent id" placeholder="Booking Agent Id"
+                    required /> </br>
                 <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
                     value="Register">Register</button>
-                {% if error %}
-                <p class="error"><strong>Error:</strong> Please make sure all values are valid.</p>
-                {% endif %}
             </form>
         </div>
     </div>

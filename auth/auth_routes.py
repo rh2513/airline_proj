@@ -1,5 +1,5 @@
 from flask import Blueprint, Flask, render_template, request, session, url_for, redirect, flash
-from flask import current_app as app
+from werkzeug.security import generate_password_hash, check_password_hash
 
 import sys
 sys.path.append("airline_proj")
@@ -19,7 +19,6 @@ def login():
 
 @auth.route('/agent-register', methods=['GET','POST'])
 def agent_register():
-    print("HI")
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -28,11 +27,13 @@ def agent_register():
 
         if password != password_confirmation:
             flash("Password must match")
-            return redirect(url_for('main.agent_register'))
+            return redirect(url_for('auth.agent_register'))
         if not len(password) >= 4:
             flash("Password length must be at least 4 characters")
-            return redirect(url_for('main.agent_register'))
+            return redirect(url_for('auth.agent_register'))
 
+        pw_hash = generate_password_hash(password, "md5")
+        
         cursor = conn.cursor()
         query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
         cursor.execute(query.format(email))
@@ -41,13 +42,13 @@ def agent_register():
 
         if(data):
             error = "This user already exists"
-            return redirect(url_for('main.agent_register', error=error))
+            return render_template('register/agent_register.html', error=error)
         else:
             ins = "INSERT INTO booking_agent VALUES(\'{}\', \'{}\', \'{}\')"
-            cursor.execute(ins.format(email, password, booking_agent_id))
+            cursor.execute(ins.format(email, pw_hash, booking_agent_id))
             conn.commit()
             cursor.close()
-            return redirect(url_for('main.login'))
+            return redirect(url_for('auth.login'))
     else:
         return render_template('register/agent_register.html')
 
@@ -58,9 +59,13 @@ def agent_login():
         password = request.form['password']
 
         cursor = conn.cursor()
-        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = \'{}\'"
-        cursor.execute(query.format(email, password))
+        query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
+        cursor.execute(query.format(email))
         data = cursor.fetchone()
+        print(password)
+        print(data["password"])
+        print(check_password_hash(data["password"], password))
+
         cursor.close()
         error = None
 
@@ -70,7 +75,7 @@ def agent_login():
             return redirect(url_for('main.home'))
         else:
             error = 'Invalid login or username'
-            return redirect(url_for('main.login', error=error))
+            return redirect(url_for('auth.login', error=error))
 
     return render_template('login.html')
 
@@ -94,10 +99,10 @@ def customer_register():
 
         if password != password_confirmation:
             flash("Password must match")
-            return redirect(url_for('main.customer_register'))
+            return redirect(url_for('auth.customer_register'))
         if not len(password) >= 4:
             flash("Password length must be at least 4 characters")
-            return redirect(url_for('main.customer_register'))
+            return redirect(url_for('auth.customer_register'))
 
         cursor = conn.cursor()
         query = "SELECT * FROM customer WHERE email = \'{}\'"
@@ -107,7 +112,7 @@ def customer_register():
 
         if(data):
             error = "This user already exists"
-            return redirect(url_for('main.customer_register', error=error))
+            return redirect(url_for('auth.customer_register', error=error))
         else:
             ins = "INSERT INTO customer VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
@@ -118,9 +123,8 @@ def customer_register():
                 date_of_birth))
             conn.commit()
             cursor.close()
-            return redirect(url_for('main.login'))
+            return redirect(url_for('auth.login'))
     else:
-        print("HERE")
         return render_template('register/customer_register.html')
 
 @auth.route('/customer-login', methods=['POST'])
@@ -142,7 +146,7 @@ def customer_login():
             return redirect(url_for('main.home'))
         else:
             error = 'Invalid login or username'
-            return redirect(url_for('main.login', error=error))
+            return redirect(url_for('auth.login', error=error))
 
     return render_template('login.html')
 
@@ -160,10 +164,10 @@ def staff_register():
 
         if password != password_confirmation:
             flash("Password must match")
-            return redirect(url_for('main.staff-register'))
+            return redirect(url_for('auth.staff-register'))
         if not len(password) >= 4:
             flash("Password length must be at least 4 characters")
-            return redirect(url_for('main.staff-register'))
+            return redirect(url_for('auth.staff-register'))
 
         cursor = conn.cursor()
         query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
@@ -173,7 +177,7 @@ def staff_register():
 
         if(data):
             error = "This user already exists"
-            return redirect(url_for('main.staff_register', error=error))
+            return redirect(url_for('auth.staff_register', error=error))
         else:
             ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
@@ -184,7 +188,7 @@ def staff_register():
                airline_name))
             conn.commit()
             cursor.close()
-            return redirect(url_for('main.login'))
+            return redirect(url_for('auth.login'))
 
     return render_template('register/staff_register.html')
 
@@ -207,12 +211,13 @@ def staff_login():
             return redirect(url_for('main.home'))
         else:
             error = 'Invalid login or username'
-            return redirect(url_for('login', error=error))
+            return redirect(url_for('auth.login', error=error))
 
-    return render_template('main.ogin.html')
+    return render_template('login.html')
 
 @auth.route('/logout')
 def logout():
     session.pop('email')
+    session.pop('type')
     return redirect('/')
 

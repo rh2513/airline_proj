@@ -11,6 +11,9 @@ app.register_blueprint(main_routes.main)
 
 from auth import auth_routes
 app.register_blueprint(auth_routes.auth)
+
+from staff import staff_routes
+app.register_blueprint(staff_routes.staff)
                 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -5,16 +5,12 @@
     <div class="card card-signin my-5">
         <div class="card-body">
             <h5 class="card-title text-center">CUSTOMER SIGN UP</h5>
-            <form method="POST" action="customer-register" class="form-signin">
-                
-                {% if messages %}
-                <ul class="flashes">
-                    {% for message in messages %}
-                    <div class="message_flash">{{ message }}</div>
-                    {% endfor %}
-                </ul>
-                {% endif %}
+            
+            {% if error %}
+            <p class="alert alert-danger"><strong>Error:</strong> {{error}} </p>
+            {% endif %}
 
+            <form method="POST" action="customer-register" class="form-signin">
                 <input class="form-control" type="text" name="name" placeholder="Name" required /></br>
                 <input class="form-control" type="text" name="street" placeholder="Street" required /> </br>
                 <input class="form-control" type="text" name="building number" placeholder="Building number" required /></br>
@@ -31,10 +27,6 @@
                 <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit"
                     value="Register">Register</button>
                 
-                {% if error %}
-                <p class="error"><strong>Error:</strong> Please make sure all values are valid.</p>
-                {% endif %}
-    
             </form>
         </div>
     </div>

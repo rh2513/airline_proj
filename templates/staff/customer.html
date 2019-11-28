@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>CUSTOMERS LIST</h1>
+{% for customer in customer_list %}
+<div class="jumbotron">
+        {% for k,v in customer.items() %}
+        <p>{{ k }}: {{ v }}</p>
+        {% endfor %}
+</div>
+{% endfor %}
+
+{% endblock %}

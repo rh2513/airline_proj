@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>BOOKING AGENT LIST</h1>
+{% for agent in agent_list %}
+<div class="jumbotron">
+        {% for k,v in agent.items() %}
+        <p>{{ k }}: {{ v }}</p>
+        {% endfor %}
+</div>
+{% endfor %}
+
+{% endblock %}
