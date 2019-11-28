@@ -1,10 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 
-    {% if not message %}
-    <a href="/search">Search for Upcoming Flights</a></br>
-    <a href="/status">Flight Status</a></br>
-    {% endif %}
-    <a href="/">Go back</a>
+{% for key, segment in segment_details.items() %}
+<tr>
+    <td>{{ key }}</td>
+    <td>{{ segment }}</td>
+</tr>
+{% endfor %}
 
 {% endblock %}
