@@ -8,9 +8,37 @@ import sys
 sys.path.append("airline_proj")
 from database import conn
 
-@staff.route('/my-flight', methods=['GET','POST'])
-def myFlight():
-    return render_template('my_flight.html')
+@staff.route('/my-flight', methods=['GET'])
+def getMyFlight():     
+    return render_template('staff/my_flight.html')
+
+    # if session.get('type') == 'STAFF':
+    #     cursor = conn.cursor()
+    #     query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
+    #     cursor.execute(query.format(session['email']))
+    #     data = cursor.fetchone()
+    #     cursor.close()
+    #     error = None
+
+    #     if(data):
+    #         cursor = conn.cursor()
+    #         query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
+    #         cursor.execute(query.format(data))
+    #         data = cursor.fetchone()
+    #         cursor.close()
+    #         error = None
+    #         if(data):
+    #             return render_template('staff/my_flight.html', data=data)
+    #         else:
+    #             error = 'No current flights for this airline exist'
+    #             return redirect(url_for('home', error=error))
+    #     else:
+    #         error = 'Staff does not exist'
+    #         return redirect(url_for('login', error=error))
+
+@staff.route('/my-flight', methods=['POST'])
+def postMyFlight():
+    return render_template('staff/my_flight.html')
 
 @staff.route('/new-flight', methods=['GET','POST'])
 def newFlight():
@@ -131,7 +159,7 @@ def customer():
 
 @staff.route('/report', methods=['GET','POST'])
 def report():
-    return render_template('report.html')
+    return render_template('staff/report.html')
 
 @staff.route('/revenue', methods=['GET','POST'])
 def revenue():
@@ -146,4 +174,4 @@ def topDestination():
     cursor.execute(query.format())
     data = cursor.fetchall()
     cursor.close()
-    return render_template('top_destination.html', data=data)
+    return render_template('staff/top_destination.html', data=data)
