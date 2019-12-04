@@ -81,14 +81,10 @@ def agent_login():
         query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
         cursor.execute(query.format(email))
         data = cursor.fetchone()
-        print(password)
-        print(data["password"])
-        print(check_password_hash(data["password"], password))
-
         cursor.close()
         error = None
 
-        if(data):
+        if(data and (check_password_hash(data["password"], password))):
             session['email'] = email
             session['type'] = 'agent'
             return redirect(url_for('home'))
@@ -123,6 +119,8 @@ def customer_register():
             flash("Password length must be at least 4 characters")
             return redirect(url_for('customer_register'))
 
+        pw_hash = generate_password_hash(password, "md5")
+        
         cursor = conn.cursor()
         query = "SELECT * FROM customer WHERE email = \'{}\'"
         cursor.execute(query.format(email))
@@ -135,7 +133,7 @@ def customer_register():
         else:
             ins = "INSERT INTO customer VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
-                email, name, password,
+                email, name, pw_hash,
                 building_number, street, city, state,
                 phone_number,
                 passport_number, passport_expiration, passport_country,
@@ -153,13 +151,14 @@ def customer_login():
         password = request.form['password']
 
         cursor = conn.cursor()
-        query = "SELECT * FROM customer WHERE email = \'{}\' and password = \'{}\'"
-        cursor.execute(query.format(email, password))
+        query = "SELECT * FROM customer WHERE email = \'{}\'"
+        cursor.execute(query.format(email))
         data = cursor.fetchone()
         cursor.close()
         error = None
 
-        if(data):
+        print(check_password_hash(data["password"], password))
+        if(data and (check_password_hash(data["password"], password))):
             session['email'] = email
             session['type'] = 'customer'
             return redirect(url_for('home'))
@@ -188,6 +187,8 @@ def staff_register():
             flash("Password length must be at least 4 characters")
             return redirect(url_for('staff-register'))
 
+        pw_hash = generate_password_hash(password, "md5")
+
         cursor = conn.cursor()
         query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
         cursor.execute(query.format(username))
@@ -201,7 +202,7 @@ def staff_register():
             ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
                username,
-               password,
+               pw_hash,
                first_name, last_name,
                date_of_birth,
                airline_name))
@@ -218,13 +219,13 @@ def staff_login():
         password = request.form['password']
 
         cursor = conn.cursor()
-        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\'"
-        cursor.execute(query.format(username, password))
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
+        cursor.execute(query.format(username))
         data = cursor.fetchone()
         cursor.close()
         error = None
 
-        if(data):
+        if(data and (check_password_hash(data["password"], password))):
             session['email'] = username
             session['type'] = 'staff'
             return redirect(url_for('home'))
@@ -257,31 +258,28 @@ def status():
 
 @app.route('/my-flight', methods=['GET'])
 def getMyFlight():     
-    return render_template('staff/my_flight.html')
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
+        cursor.execute(query.format(session['email']))
+        data = cursor.fetchone()
+        cursor.close()
+        error = None
 
-    # if session.get('type') == 'STAFF':
-    #     cursor = conn.cursor()
-    #     query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
-    #     cursor.execute(query.format(session['email']))
-    #     data = cursor.fetchone()
-    #     cursor.close()
-    #     error = None
-
-    #     if(data):
-    #         cursor = conn.cursor()
-    #         query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
-    #         cursor.execute(query.format(data))
-    #         data = cursor.fetchone()
-    #         cursor.close()
-    #         error = None
-    #         if(data):
-    #             return render_template('staff/my_flight.html', data=data)
-    #         else:
-    #             error = 'No current flights for this airline exist'
-    #             return redirect(url_for('home', error=error))
-    #     else:
-    #         error = 'Staff does not exist'
-    #         return redirect(url_for('login', error=error))
+        if(data):
+            cursor = conn.cursor()
+            query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
+            cursor.execute(query.format(data['airline_name']))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if(data):
+                return render_template('staff/my_flight.html', data=data)
+            else:
+                error = 'No current flights for this airline exist'
+                return render_template('staff/my_flight.html', error=error)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/my-flight', methods=['POST'])
 def postMyFlight():
@@ -309,9 +307,10 @@ def newFlight():
 
         if(data):
             error = 'Invalid flight'
-            return redirect(url_for('new-flight', error=error))
+            return render_template('staff/create_flight.html', error=error)
         else:
-            ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+            cursor = conn.cursor()
+            ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
                airline_name,
                flight_num,
@@ -325,6 +324,10 @@ def newFlight():
             return redirect(url_for('home'))
 
     return render_template('staff/create_flight.html')
+
+@app.route('/flight-info', methods=['GET','POST'])
+def flightInfo():
+    return 
 
 @app.route('/add-airplane', methods=['GET','POST'])
 def addAirplane():
@@ -344,6 +347,7 @@ def addAirplane():
             error = 'Invalid airplane'
             return redirect(url_for('add-airplane', error=error))
         else:
+            cursor = conn.cursor()
             ins = "INSERT INTO airplane VALUES(\'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
                airline_name,
@@ -372,6 +376,7 @@ def addAirport():
             error = 'Invalid airport'
             return redirect(url_for('add-airport', error=error))
         else:
+            cursor = conn.cursor()
             ins = "INSERT INTO airport VALUES(\'{}\', \'{}\')"
             cursor.execute(ins.format(
                airport_name,
@@ -413,10 +418,11 @@ def revenue():
 @app.route('/top-destination', methods=['GET','POST'])
 def topDestination():
     cursor = conn.cursor()
-    query = "SELECT TOP 3 * FROM customer"
+    query = "SELECT * FROM (SELECT count(arrival_airport) as airport, arrival_airport FROM flight GROUP BY (arrival_airport)) as destination ORDER BY airport DESC LIMIT 3"
     cursor.execute(query.format())
     data = cursor.fetchall()
     cursor.close()
+    
     return render_template('staff/top_destination.html', data=data)
 
 # --------------------------------------------------------------------
