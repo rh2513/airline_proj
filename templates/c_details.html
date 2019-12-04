@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+    {% for jsfile_name in script_list %}
+        <script src="{{ host }}/{{ jsfile_name }}.js"></script>
+    {% endfor %}
+</head>
+
+<body>
+<form action="/c_sdetailsAuth" method="POST">
+	<input type="text" name="date start" placeholder="Date start" required/></br>
+	<input type="text" name="date end" placeholder="Date end" required/></br>
+	<input type="submit" value=Search /></br>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+	<p><strong>Money spent between this time range</strong></p>
+	<table border="1">
+	<tr>
+		<th>The sum of price</th>
+	</tr>
+	{% for dic in post %}
+	<tr>
+		<td>{{dic.sum}}</td>
+	</tr>
+	{% endfor %}
+	</table>
+	{{ myechart|safe }} 
+</form>
+<a href="/c_home">Go back</a>
+</body>
+</html>
