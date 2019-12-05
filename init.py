@@ -22,6 +22,7 @@ conn = pymysql.connect(host='localhost',
 app = Flask(__name__)
 app.secret_key = 'some key that you will never guess'
 
+
 @app.route('/')
 def home():
     return render_template('home.html')
@@ -32,11 +33,13 @@ def home():
 def register():
     return render_template('register/register.html')
 
+
 @app.route('/login')
 def login():
     return render_template("login.html")
 
-@app.route('/agent-register', methods=['GET','POST'])
+
+@app.route('/agent-register', methods=['GET', 'POST'])
 def agent_register():
     if request.method == 'POST':
         email = request.form['email']
@@ -52,7 +55,7 @@ def agent_register():
             return redirect(url_for('agent_register'))
 
         pw_hash = generate_password_hash(password, "md5")
-        
+
         cursor = conn.cursor()
         query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
         cursor.execute(query.format(email))
@@ -70,6 +73,7 @@ def agent_register():
             return redirect(url_for('login'))
     else:
         return render_template('register/agent_register.html')
+
 
 @app.route('/agent-login', methods=['POST'])
 def agent_login():
@@ -95,7 +99,7 @@ def agent_login():
     return render_template('login.html')
 
 # CUSTOMER AUTHENTICATION (SIGNUP / LOGIN)
-@app.route('/customer-register', methods=['GET','POST'])
+@app.route('/customer-register', methods=['GET', 'POST'])
 def customer_register():
     if request.method == 'POST':
         name = request.form['name']
@@ -120,7 +124,7 @@ def customer_register():
             return redirect(url_for('customer_register'))
 
         pw_hash = generate_password_hash(password, "md5")
-        
+
         cursor = conn.cursor()
         query = "SELECT * FROM customer WHERE email = \'{}\'"
         cursor.execute(query.format(email))
@@ -143,6 +147,7 @@ def customer_register():
             return redirect(url_for('login'))
     else:
         return render_template('register/customer_register.html')
+
 
 @app.route('/customer-login', methods=['POST'])
 def customer_login():
@@ -169,7 +174,7 @@ def customer_login():
     return render_template('login.html')
 
 # STAFF AUTHENTICATION (SIGNUP / LOGIN)
-@app.route('/staff-register', methods=['GET','POST'])
+@app.route('/staff-register', methods=['GET', 'POST'])
 def staff_register():
     if request.method == 'POST':
         username = request.form['username']
@@ -212,6 +217,7 @@ def staff_register():
 
     return render_template('register/staff_register.html')
 
+
 @app.route('/staff-login', methods=['POST'])
 def staff_login():
     if request.method == 'POST':
@@ -228,12 +234,14 @@ def staff_login():
         if(data and (check_password_hash(data["password"], password))):
             session['email'] = username
             session['type'] = 'staff'
+            session['airline'] = data['airline_name']
             return redirect(url_for('home'))
         else:
             error = 'Invalid login or username'
             return redirect(url_for('login', error=error))
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -243,47 +251,68 @@ def logout():
 
 # ---------------------------------------------------------------------
 # SEARCH
-@app.route('/search-flight', methods=['GET','POST'])
+@app.route('/search-flight', methods=['GET', 'POST'])
 def flight():
 
     return render_template('info.html')
 
 
-@app.route('/search-status', methods=['GET','POST'])
+@app.route('/search-status', methods=['GET', 'POST'])
 def status():
     return render_template('info.html')
 
 # ---------------------------------------------------------------------
 # STAFF
 
+
 @app.route('/my-flight', methods=['GET'])
-def getMyFlight():     
+def getMyFlight():
     if (session['type'] == 'staff'):
         cursor = conn.cursor()
-        query = "SELECT airline_name FROM airline_staff WHERE username = \'{}\'"
-        cursor.execute(query.format(session['email']))
-        data = cursor.fetchone()
+        query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
+        cursor.execute(query.format(session['airline']))
+        data = cursor.fetchall()
         cursor.close()
         error = None
-
         if(data):
-            cursor = conn.cursor()
-            query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
-            cursor.execute(query.format(data['airline_name']))
-            data = cursor.fetchall()
-            cursor.close()
-            error = None
-            if(data):
-                return render_template('staff/my_flight.html', data=data)
-            else:
-                error = 'No current flights for this airline exist'
-                return render_template('staff/my_flight.html', error=error)
+            return render_template('staff/my_flight.html', data=data)
+        else:
+            error = 'No current flights for this airline exist'
+            return render_template('staff/my_flight.html', error=error)
     error = 'Staff does not exist'
     return redirect(url_for('login', error=error))
 
+
 @app.route('/my-flight', methods=['POST'])
 def postMyFlight():
-    return render_template('staff/my_flight.html')
+    cursor = conn.cursor()
+    query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
+    cursor.execute(query.format(session['airline'], request.form['departure_airport']))
+    data = cursor.fetchall()
+    cursor.close()
+    error = None
+
+    filter = []
+    for d in data:
+        add = True
+        if (request.form['flight_num'] not in str(d['flight_num']) and request.form['flight_num'] != ''):
+            add = False
+        if (request.form['departure_time'] not in d['departure_time'] and request.form['departure_time'] != ''):
+            add = False
+        if (request.form['arrival_time'] not in d['arrival_time'] and request.form['arrival_time'] != ''):
+            add = False
+        if (request.form['departure_airport'] not in d['departure_airport'] and request.form['departure_airport'] != ''):
+            add = False
+        if (request.form['arrival_airport'] not in d['arrival_airport'] and request.form['arrival_airport'] != ''):
+            add = False
+        if (add == True):
+            filter.append(d)
+
+    if(data):
+        return render_template('staff/my_flight.html', data=filter)
+    else:
+        error = 'No current flights for this airline exist'
+        return render_template('staff/my_flight.html', error=error)
 
 @app.route('/new-flight', methods=['GET','POST'])
 def newFlight():
@@ -325,9 +354,36 @@ def newFlight():
 
     return render_template('staff/create_flight.html')
 
-@app.route('/flight-info', methods=['GET','POST'])
-def flightInfo():
-    return 
+@app.route('/flight/<slug>')
+def lookAtFlight(slug):
+    cursor = conn.cursor()
+    query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
+    print(request.form)
+    cursor.execute(query.format(slug))
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if (data):
+        return render_template('staff/individual_flight.html', data=data)
+    else:
+        error = "FLIGHT DOES NOT EXIST"
+        return render_template('staff/my_flight.html', error=error)
+
+# IMPLEMENT PUT ***
+@app.route('/edit-flight/<slug>', methods=['GET','PUT'])
+def editFlight(slug):
+    cursor = conn.cursor()
+    query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
+    print(request.form)
+    cursor.execute(query.format(slug))
+    data = cursor.fetchone()
+    cursor.close()
+    error = None
+    if (data):
+        return render_template('staff/edit_flight.html', data=data)
+    else:
+        error = "FLIGHT DOES NOT EXIST"
+        return render_template('staff/my_flight.html', error=error)
 
 @app.route('/add-airplane', methods=['GET','POST'])
 def addAirplane():

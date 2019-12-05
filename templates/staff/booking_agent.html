@@ -2,6 +2,15 @@
 {% block content %}
 
 <h1>BOOKING AGENT LIST</h1>
+
+<div class="jumbotron">
+        <h5>TOP 5 BOOKING AGENT IN PAST MONTH</h5>
+
+        <h5>TOP 5 BOOKING AGENT IN PAST YEAR</h5>
+
+        <h5>TOP 5 BOOKING AGENT BASED ON COMMISSION IN PAST YEAR</h5>
+</div>
+
 {% for agent in agent_list %}
 <div class="jumbotron">
         {% for k,v in agent.items() %}
