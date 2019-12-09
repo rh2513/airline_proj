@@ -2,16 +2,16 @@
 {% block content %}
 
 <div>
-    <form method="PUT" action="/edit-flight" class="form-signin">
-        <input class="form-control" type="text" value="{{ data.flight_num }}" placeholder="Flight Number" required /></br>
-        <input class="form-control" type="text" value="{{ data.airline_name }}" placeholder="Airline Name" required /> </br>
-        <input class="form-control" type="text" value="{{ data.departure_time }}" placeholder="Departure Time" required /></br>
-        <input class="form-control" type="time" value="{{ data.arrival_time }}" placeholder="Arrival Time" required /></br>
-        <input class="form-control" type="text" value="{{ data.departure_airport }}" placeholder="Departure Airport" required /></br>
-        <input class="form-control" type="time" value="{{ data.arrival_airport }}" placeholder="Arrival Airport" required /></br>
-        <input class="form-control" type="text" value="{{ data.price }}" placeholder="Price" required /></br>
-        <input class="form-control" type="text" value="{{ data.status }}" placeholder="Status" required /></br>
-        <input class="form-control" type="text" value="{{ data.airplane_id }}" placeholder="Airplane Id" required /></br>
+    <form method="POST" action="/edit-flight/{{ data.flight_num }}" class="form-signin">
+        <input class="form-control" type="text" name="flight num" value="{{ data.flight_num }}" placeholder="Flight Number" required /></br>
+        <input class="form-control" type="text" name="airline name" value="{{ data.airline_name }}" placeholder="Airline Name" required /> </br>
+        <input class="form-control" type="text" name="departure time" value="{{ data.departure_time }}" placeholder="Departure Time" required /></br>
+        <input class="form-control" type="text" name="arrival time" value="{{ data.arrival_time }}" placeholder="Arrival Time" required /></br>
+        <input class="form-control" type="text" name="departure airport" value="{{ data.departure_airport }}" placeholder="Departure Airport" required /></br>
+        <input class="form-control" type="text" name="arrival airport" value="{{ data.arrival_airport }}" placeholder="Arrival Airport" required /></br>
+        <input class="form-control" type="text" name="price" value="{{ data.price }}" placeholder="Price" required /></br>
+        <input class="form-control" type="text" name="status" value="{{ data.status }}" placeholder="Status" required /></br>
+        <input class="form-control" type="text" name="airplane id" value="{{ data.airplane_id }}" placeholder="Airplane Id" required /></br>
         <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit">Edit Flight</button>
     </form>
 </div>

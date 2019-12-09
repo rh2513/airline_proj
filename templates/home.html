@@ -2,17 +2,16 @@
 {% block content %}
 
 {% if "staff" in session['type'] %}
-<div class="sidenav">
-    <a href="my-flight">View My flights</a>
-    <a href="new-flight">Create new flights</a>
-    <a href="status">Change Status of flights</a>
-    <a href="add-airplane">Add airplane in the system</a>
-    <a href="add-airport">Add new airport in the system</a>
-    <a href="booking-agent">View all the booking agents</a>
-    <a href="customer">View frequent customers</a>
-    <a href="report">View reports</a>
-    <a href="revenue">Comparison of Revenue earned</a>
-    <a href="top-destination">View Top destinations</a>
+<div class="btn-group-vertical">
+    <button class="btn btn-secondary"><a href="my-flight" style="color: white; text-decoration:none">View My flights</a></button>
+    <button class="btn btn-secondary"><a href="new-flight" style="color:white; text-decoration:none">Create new flights</a></button>
+    <button class="btn btn-secondary"><a href="add-airplane" style="color:white; text-decoration:none">Add airplane in the system</a></button>
+    <button class="btn btn-secondary"><a href="add-airport" style="color:white; text-decoration:none">Add new airport in the system</a></button>
+    <button class="btn btn-secondary"><a href="booking-agent" style="color:white; text-decoration:none">View all the booking agents</a></button>
+    <button class="btn btn-secondary"><a href="customer" style="color:white; text-decoration:none">View frequent customers</a></button>
+    <button class="btn btn-secondary"><a href="report" style="color:white; text-decoration:none">View reports</a></button>
+    <button class="btn btn-secondary"><a href="revenue" style="color:white; text-decoration:none">Comparison of Revenue earned</a></button>
+    <button class="btn btn-secondary"><a href="top-destination" style="color:white; text-decoration:none">View Top destinations</a></button>
 </div>
 
 

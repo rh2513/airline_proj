@@ -253,17 +253,15 @@ def logout():
 # SEARCH
 @app.route('/search-flight', methods=['GET', 'POST'])
 def flight():
-
-    return render_template('info.html')
+    return render_template('search.html')
 
 
 @app.route('/search-status', methods=['GET', 'POST'])
 def status():
-    return render_template('info.html')
+    return render_template('search.html')
 
 # ---------------------------------------------------------------------
 # STAFF
-
 
 @app.route('/my-flight', methods=['GET'])
 def getMyFlight():
@@ -358,7 +356,6 @@ def newFlight():
 def lookAtFlight(slug):
     cursor = conn.cursor()
     query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
-    print(request.form)
     cursor.execute(query.format(slug))
     data = cursor.fetchone()
     cursor.close()
@@ -369,21 +366,51 @@ def lookAtFlight(slug):
         error = "FLIGHT DOES NOT EXIST"
         return render_template('staff/my_flight.html', error=error)
 
-# IMPLEMENT PUT ***
-@app.route('/edit-flight/<slug>', methods=['GET','PUT'])
+@app.route('/edit-flight/<slug>', methods=['GET','POST'])
 def editFlight(slug):
     cursor = conn.cursor()
     query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
-    print(request.form)
     cursor.execute(query.format(slug))
     data = cursor.fetchone()
     cursor.close()
     error = None
+
     if (data):
+        if request.method == 'POST':
+            cursor = conn.cursor()
+            query = "DELETE FROM flight WHERE flight_num = \'{}\'"
+            cursor.execute(query.format(slug))
+            cursor.close()
+
+            airline_name = request.form['airline name']
+            flight_num = request.form['flight num']
+            departure_airport = request.form['departure airport']
+            departure_time = request.form['departure time']
+            arrival_airport = request.form['arrival airport']
+            arrival_time = request.form['arrival time']
+            price = request.form['price']
+            status = request.form['status']
+            airplane_id = request.form['airplane id']
+
+            status = request.form['status']
+            cursor = conn.cursor()
+            query = "INSERT INTO flight VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+            cursor.execute(query.format(
+               airline_name,
+               flight_num,
+               departure_airport, departure_time,
+               arrival_airport, arrival_time,
+               price,
+               status,
+               airplane_id))
+            conn.commit()
+            cursor.close()
+            return redirect(url_for('lookAtFlight', slug=slug))
+
         return render_template('staff/edit_flight.html', data=data)
-    else:
-        error = "FLIGHT DOES NOT EXIST"
-        return render_template('staff/my_flight.html', error=error)
+
+    error = "FLIGHT DOES NOT EXIST"
+    return render_template('staff/edit_flight.html', error=error)
 
 @app.route('/add-airplane', methods=['GET','POST'])
 def addAirplane():
