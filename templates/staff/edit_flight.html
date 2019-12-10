@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 
+<a href="/">Go back</a>
+
 <div>
     <form method="POST" action="/edit-flight/{{ data.flight_num }}" class="form-signin">
         <input class="form-control" type="text" name="flight num" value="{{ data.flight_num }}" placeholder="Flight Number" required /></br>

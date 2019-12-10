@@ -477,26 +477,84 @@ def bookingAgent():
     cursor.execute(query.format())
     data = cursor.fetchall()
     cursor.close()
-    return render_template('staff/booking_agent.html', agent_list=data)
 
-@app.route('/customer', methods=['GET','POST'])
+    cursor = conn.cursor()
+    query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE purchase_date > NOW() - interval 5 MONTH ORDER BY num DESC LIMIT 5"
+    cursor.execute(query.format())
+    top5month = cursor.fetchall()
+    cursor.close()
+
+    cursor = conn.cursor()
+    query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE purchase_date > NOW() - interval 1 YEAR ORDER BY num DESC LIMIT 5"
+    cursor.execute(query.format())
+    top5year = cursor.fetchall()
+    cursor.close()
+
+    # cursor = conn.cursor()
+    # query = ""
+    # cursor.execute(query.format())
+    # top5commission = cursor.fetchall()
+    # cursor.close()
+
+    return render_template('staff/booking_agent.html', agent_list=data, top5month=top5month, top5year=top5year)
+
+@app.route('/customer', methods=['GET'])
 def customer():
     cursor = conn.cursor()
     query = "SELECT * FROM customer"
     cursor.execute(query.format())
     data = cursor.fetchall()
     cursor.close()
-    return render_template('staff/customer.html', customer_list=data)
+
+    # Will I need GROUP BY???
+    cursor = conn.cursor()
+    query = "SELECT customer_email, count(customer_email) AS num FROM purchases WHERE purchase_date > NOW() - interval 1 YEAR ORDER BY num DESC LIMIT 5"
+    cursor.execute(query.format())
+    customer = cursor.fetchall()
+    cursor.close()
+
+    return render_template('staff/customer.html', customer_list=data, topcustomer=customer)
+
+# TEST
+@app.route('/customer-flight/<slug>', methods=['GET'])
+def individualCustomer(slug):
+    cursor = conn.cursor()
+    query = "SELECT * FROM purchases NATURAL JOIN ticket NATURAL JOIN flight WHERE customer_email=\'{}\' AND airline_name=\'{}\'"
+    cursor.execute(query.format(slug, session['airline']))
+    customer = cursor.fetchall()
+    cursor.close()
+
+    return render_template('staff/individual_customer.html', customer=customer)
 
 @app.route('/report', methods=['GET','POST'])
 def report():
-    return render_template('staff/report.html')
+    cursor = conn.cursor()
+    query = "SELECT count(*) FROM ticket"
+    cursor.execute(query.format())
+    data = cursor.fetchall()
+    cursor.close()
+
+    # filter = []
+    # for d in data:
+    #     add = True
+    #     # range of dates
+    #     if (request.form[''] not in d[''] and request.form[''] != ''):
+    #         add = False
+    #     if (request.form[''] not in d[''] and request.form[''] != ''):
+    #         add = False
+    #     if (request.form[''] not in d[''] and request.form[''] != ''):
+    #         add = False
+    #     if (request.form[''] not in d[''] and request.form[''] != ''):
+    #         add = False
+    #     if (add == True):
+    #         filter.append(d)
+
+
+    return render_template('staff/report.html', data=data)
 
 @app.route('/revenue', methods=['GET','POST'])
 def revenue():
-    labels = ['JAN', 'FEB', 'MAR', 'APR','MAY', 'JUN', 'JUL', 'AUG','SEP', 'OCT', 'NOV', 'DEC']
-    values = [967.67, 1190.89, 1079.75, 1349.19,2328.91, 2504.28, 2873.83, 4764.87,4349.29, 6458.30, 9907, 16297]
-    return render_template('staff/revenue.html', max=17000, labels=labels, values=values)
+  return render_template('staff/revenue.html')
 
 @app.route('/top-destination', methods=['GET','POST'])
 def topDestination():

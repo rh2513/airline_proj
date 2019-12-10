@@ -1,14 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
 
+<a href="/">Go back</a>
+
 <h1>BOOKING AGENT LIST</h1>
 
 <div class="jumbotron">
         <h5>TOP 5 BOOKING AGENT IN PAST MONTH</h5>
+        <ul>
+                {% for agent in top5month %}
+                <li> {{ agent }} </li>
+                {% endfor %}
+        </ul>
 
         <h5>TOP 5 BOOKING AGENT IN PAST YEAR</h5>
-
+        <ul>
+                {% for agent in top5year %}
+                <li> {{ agent }} </li>
+                {% endfor %}
+        </ul>
         <h5>TOP 5 BOOKING AGENT BASED ON COMMISSION IN PAST YEAR</h5>
+        <!-- <ul>
+                {% for agent in top5commission %}
+                <li> {{ agent }} </li>
+                {% endfor %}
+        </ul> -->
 </div>
 
 {% for agent in agent_list %}

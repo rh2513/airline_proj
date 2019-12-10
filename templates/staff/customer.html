@@ -1,17 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
+<a href="/">Go back</a>
+
 <div class="jumbotron">
         <h5>MOST FREQUENT CUSTOMERS WITHIN LAST YEAR</h5>
+        <ul>
+        {% for customer in topcustomer %}
+                <li>
+                        {{ customer }}
+                </li>
+        {% endfor %}
+        </ul>
 </div>
 
 <h1>CUSTOMERS LIST</h1>
 {% for customer in customer_list %}
-<div class="jumbotron">
-        {% for k,v in customer.items() %}
-        <p>{{ k }}: {{ v }}</p>
-        {% endfor %}
-</div>
+<form action="/customer-flight/{{ customer.email }}" method="GET">
+        <button class="jumbotron">
+                {{ customer.email }}
+                {{ customer.name }}
+                {{ customer.passport_country }}
+                {{ customer.phone_number }}
+        </button>
+</form>
 {% endfor %}
 
 {% endblock %}

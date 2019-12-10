@@ -1,7 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>REPORT</h1>
-Total amounts of ticket sold based on range of dates/last year/last month etc. Month wise tickets sold in a bar chart.
+<a href="/">Go back</a>
 
-{% endblock %}
+<h1>REPORT</h1>
+
+<div class="jumbotron">
+    <h3>SELECT A RANGE OF DATE</h3>
+    <form method="POST" action="/report" class="form-inline active-purple-4">
+        <input class="form-control form-control-sm mr-3" type="date" placeholder="Start" aria-label="Search">
+        <input class="form-control form-control-sm mr-3" type="date" placeholder="End" aria-label="Search">
+        <button class="btn"> Search </button>
+    </form>
+
+    {% if data %}
+    <br />
+    <h4>Total between this date range: {{ data }}</h4>
+    {% endif %}
+</div>
+
+<div class="jumbotron">
+    <h3>MONTHLY REPORT</h3>
+    // BAR CHART
+</div>{% endblock %}
