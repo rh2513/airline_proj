@@ -4,27 +4,5 @@
 <a href="/">Go back</a>
 
 <h1>PIE CHART</h1>
-<canvas id="chart" width="600" height="400"></canvas>
-<!-- <script>
-    var pieData = [
-        {% for item, label, colors in set %}
-            {
-                value: { { item } },
-                label: "{{label}}",
-                    color : "{{colors}}"
-            },
-        {% endfor %}
-            ];
 
-    // get bar chart canvas
-    var mychart = document.getElementById("chart").getContext("2d");
-    steps = 10
-    max = {{ max }}
-
-    // draw pie chart
-    new Chart(document.getElementById("chart").getContext("2d")).Pie(pieData);
-
-</script> -->
-
-Draw a pie chart for showing total amount of revenue earned from direct sales (when customer bought tickets without using a booking agent) and total amount of revenue earned from indirect sales (when customer bought tickets using booking agents) in the last month and last year.
 {% endblock %}

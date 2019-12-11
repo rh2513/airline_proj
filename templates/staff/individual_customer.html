@@ -3,7 +3,18 @@
 
 <a href="/">Go back</a>
 
-<h4>{{ customer.email }}</h4>
-<h4>{{ customer.name }}</h4>
+<h1>{{ customer[0].customer_email }}'s Flight</h1>
+{% for c in customer %}
+<div class="jumbotron">
+    <h4>Flight Num: {{ c.flight_num }}</h4>
+    <h4>Booking Agent: {{ c.booking_agent_id}}</h4>
+    <h4>Departure Airport: {{ c.departure_airport }}</h4>
+    <h4>Arrival Airport: {{ c.arrival_airport }}</h4>
+    <h4>Status: {{ c.status }}</h4>
+    <h4>Price: {{ c.price }}</h4>
+    <h4>Departure Time: {{ c.departure_time }}</h4>
+    <h4>Arrival Time: {{ c.arrival_time }}</h4>
+</div>
+{% endfor %}
 
 {% endblock %}

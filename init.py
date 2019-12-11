@@ -1,6 +1,8 @@
 # import packages from Flask Lib
 from flask import Flask, render_template, request, session, url_for, redirect, flash
 from werkzeug.security import generate_password_hash, check_password_hash
+import hashlib
+
 # from pyecharts import Bar
 # from pyecharts import Pie
 # from pyecharts import Page
@@ -25,7 +27,13 @@ app.secret_key = 'some key that you will never guess'
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    cursor = conn.cursor()
+    query = "SELECT * FROM flight "
+    cursor.execute(query.format())
+    data = cursor.fetchall()
+    cursor.close()
+
+    return render_template('home.html', data=data)
 
 # ---------------------------------------------------------------------
 # AUTHENTICATION
@@ -50,11 +58,8 @@ def agent_register():
         if password != password_confirmation:
             flash("Password must match")
             return redirect(url_for('agent_register'))
-        if not len(password) >= 4:
-            flash("Password length must be at least 4 characters")
-            return redirect(url_for('agent_register'))
 
-        pw_hash = generate_password_hash(password, "md5")
+        pw_hash = hashlib.md5(password.encode().hexdiges()) 
 
         cursor = conn.cursor()
         query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
@@ -80,15 +85,16 @@ def agent_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-
+        result = hashlib.md5(password.encode()) 
+    
         cursor = conn.cursor()
-        query = "SELECT * FROM booking_agent WHERE email = \'{}\'"
-        cursor.execute(query.format(email))
+        query = "SELECT * FROM booking_agent WHERE email = \'{}\' and password = \'{}\' "
+        cursor.execute(query.format(email, result.hexdigest()))
         data = cursor.fetchone()
         cursor.close()
         error = None
 
-        if(data and (check_password_hash(data["password"], password))):
+        if(data):
             session['email'] = email
             session['type'] = 'agent'
             return redirect(url_for('home'))
@@ -119,11 +125,8 @@ def customer_register():
         if password != password_confirmation:
             flash("Password must match")
             return redirect(url_for('customer_register'))
-        if not len(password) >= 4:
-            flash("Password length must be at least 4 characters")
-            return redirect(url_for('customer_register'))
 
-        pw_hash = generate_password_hash(password, "md5")
+        pw_hash = hashlib.md5(password.encode().hexdigest()) 
 
         cursor = conn.cursor()
         query = "SELECT * FROM customer WHERE email = \'{}\'"
@@ -154,16 +157,16 @@ def customer_login():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
+        result = hashlib.md5(password.encode()) 
 
         cursor = conn.cursor()
-        query = "SELECT * FROM customer WHERE email = \'{}\'"
-        cursor.execute(query.format(email))
+        query = "SELECT * FROM customer WHERE email = \'{}\' and password = \'{}\'"
+        cursor.execute(query.format(email, result.hexdigest()))
         data = cursor.fetchone()
         cursor.close()
         error = None
 
-        print(check_password_hash(data["password"], password))
-        if(data and (check_password_hash(data["password"], password))):
+        if(data):
             session['email'] = email
             session['type'] = 'customer'
             return redirect(url_for('home'))
@@ -188,11 +191,8 @@ def staff_register():
         if password != password_confirmation:
             flash("Password must match")
             return redirect(url_for('staff-register'))
-        if not len(password) >= 4:
-            flash("Password length must be at least 4 characters")
-            return redirect(url_for('staff-register'))
 
-        pw_hash = generate_password_hash(password, "md5")
+        pw_hash = hashlib.md5(password.encode().hexdigest()) 
 
         cursor = conn.cursor()
         query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
@@ -223,15 +223,16 @@ def staff_login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        result = hashlib.md5(password.encode()) 
 
         cursor = conn.cursor()
-        query = "SELECT * FROM airline_staff WHERE username = \'{}\'"
-        cursor.execute(query.format(username))
+        query = "SELECT * FROM airline_staff WHERE username = \'{}\' and password = \'{}\'"
+        cursor.execute(query.format(username, result.hexdigest()))
         data = cursor.fetchone()
         cursor.close()
         error = None
 
-        if(data and (check_password_hash(data["password"], password))):
+        if(data):
             session['email'] = username
             session['type'] = 'staff'
             session['airline'] = data['airline_name']
@@ -251,14 +252,33 @@ def logout():
 
 # ---------------------------------------------------------------------
 # SEARCH
-@app.route('/search-flight', methods=['GET', 'POST'])
-def flight():
-    return render_template('search.html')
+@app.route('/search-flight', methods=['POST'])
+def searchFlight():
+    cursor = conn.cursor()
+    query = "SELECT * FROM flight "
+    cursor.execute(query.format())
+    data = cursor.fetchall()
+    cursor.close()
 
+    filter = []
+    for d in data:
+        add = True
+        if (request.form['flight_num'] not in str(d['flight_num']) and request.form['flight_num'] != ''):
+            add = False
+        # if (str(request.form['departure_time']) not in str(d['departure_time']) and request.form['departure_time'] != ''):
+        #     add = False
+        # if (str(request.form['arrival_time']) != str(d['arrival_time']) and request.form['arrival_time'] != ''):
+        #     add = False
+        if (request.form['departure_airport'] not in d['departure_airport'] and request.form['departure_airport'] != ''):
+            add = False
+        if (request.form['arrival_airport'] not in d['arrival_airport'] and request.form['arrival_airport'] != ''):
+            add = False
+        if (request.form['status'] not in d['status'] and request.form['status'] != ''):
+            add = False
+        if (add == True):
+            filter.append(d)
 
-@app.route('/search-status', methods=['GET', 'POST'])
-def status():
-    return render_template('search.html')
+    return render_template('home.html', data=filter)
 
 # ---------------------------------------------------------------------
 # STAFF
@@ -283,105 +303,43 @@ def getMyFlight():
 
 @app.route('/my-flight', methods=['POST'])
 def postMyFlight():
-    cursor = conn.cursor()
-    query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
-    cursor.execute(query.format(session['airline'], request.form['departure_airport']))
-    data = cursor.fetchall()
-    cursor.close()
-    error = None
-
-    filter = []
-    for d in data:
-        add = True
-        if (request.form['flight_num'] not in str(d['flight_num']) and request.form['flight_num'] != ''):
-            add = False
-        if (request.form['departure_time'] not in d['departure_time'] and request.form['departure_time'] != ''):
-            add = False
-        if (request.form['arrival_time'] not in d['arrival_time'] and request.form['arrival_time'] != ''):
-            add = False
-        if (request.form['departure_airport'] not in d['departure_airport'] and request.form['departure_airport'] != ''):
-            add = False
-        if (request.form['arrival_airport'] not in d['arrival_airport'] and request.form['arrival_airport'] != ''):
-            add = False
-        if (add == True):
-            filter.append(d)
-
-    if(data):
-        return render_template('staff/my_flight.html', data=filter)
-    else:
-        error = 'No current flights for this airline exist'
-        return render_template('staff/my_flight.html', error=error)
-
-@app.route('/new-flight', methods=['GET','POST'])
-def newFlight():
-    if request.method == 'POST':
-        airline_name = request.form['airline name']
-        flight_num = request.form['flight num']
-        departure_airport = request.form['departure airport']
-        departure_time = request.form['departure time']
-        arrival_airport = request.form['arrival airport']
-        arrival_time = request.form['arrival time']
-        price = request.form['price']
-        status = request.form['status']
-        airplane_id = request.form['airplane id']
-
+    if (session['type'] == 'staff'):
         cursor = conn.cursor()
-        query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
-        cursor.execute(query.format(flight_num))
-        data = cursor.fetchone()
+        query = "SELECT * FROM flight WHERE airline_name = \'{}\'"
+        cursor.execute(query.format(session['airline'], request.form['departure_airport']))
+        data = cursor.fetchall()
         cursor.close()
         error = None
 
+        filter = []
+        for d in data:
+            add = True
+            if (request.form['flight_num'] not in str(d['flight_num']) and request.form['flight_num'] != ''):
+                add = False
+            if (str(request.form['departure_time']) not in str(d['departure_time']) and request.form['departure_time'] != ''):
+                add = False
+            if (str(request.form['arrival_time']) != str(d['arrival_time']) and request.form['arrival_time'] != ''):
+                add = False
+            if (request.form['departure_airport'] not in d['departure_airport'] and request.form['departure_airport'] != ''):
+                add = False
+            if (request.form['arrival_airport'] not in d['arrival_airport'] and request.form['arrival_airport'] != ''):
+                add = False
+            if (add == True):
+                filter.append(d)
+
         if(data):
-            error = 'Invalid flight'
-            return render_template('staff/create_flight.html', error=error)
+            return render_template('staff/my_flight.html', data=filter)
         else:
-            cursor = conn.cursor()
-            ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
-            cursor.execute(ins.format(
-               airline_name,
-               flight_num,
-               departure_airport, departure_time,
-               arrival_airport, arrival_time,
-               price,
-               status,
-               airplane_id))
-            conn.commit()
-            cursor.close()
-            return redirect(url_for('home'))
+            error = 'No current flights for this airline exist'
+            return render_template('staff/my_flight.html', error=error)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
-    return render_template('staff/create_flight.html')
 
-@app.route('/flight/<slug>')
-def lookAtFlight(slug):
-    cursor = conn.cursor()
-    query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
-    cursor.execute(query.format(slug))
-    data = cursor.fetchone()
-    cursor.close()
-    error = None
-    if (data):
-        return render_template('staff/individual_flight.html', data=data)
-    else:
-        error = "FLIGHT DOES NOT EXIST"
-        return render_template('staff/my_flight.html', error=error)
-
-@app.route('/edit-flight/<slug>', methods=['GET','POST'])
-def editFlight(slug):
-    cursor = conn.cursor()
-    query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
-    cursor.execute(query.format(slug))
-    data = cursor.fetchone()
-    cursor.close()
-    error = None
-
-    if (data):
+@app.route('/new-flight', methods=['GET','POST'])
+def newFlight():
+    if (session['type'] == 'staff'):
         if request.method == 'POST':
-            cursor = conn.cursor()
-            query = "DELETE FROM flight WHERE flight_num = \'{}\'"
-            cursor.execute(query.format(slug))
-            cursor.close()
-
             airline_name = request.form['airline name']
             flight_num = request.form['flight num']
             departure_airport = request.form['departure airport']
@@ -392,179 +350,276 @@ def editFlight(slug):
             status = request.form['status']
             airplane_id = request.form['airplane id']
 
-            status = request.form['status']
             cursor = conn.cursor()
-            query = "INSERT INTO flight VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
-            cursor.execute(query.format(
-               airline_name,
-               flight_num,
-               departure_airport, departure_time,
-               arrival_airport, arrival_time,
-               price,
-               status,
-               airplane_id))
-            conn.commit()
+            query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
+            cursor.execute(query.format(flight_num))
+            data = cursor.fetchone()
             cursor.close()
-            return redirect(url_for('lookAtFlight', slug=slug))
+            error = None
 
-        return render_template('staff/edit_flight.html', data=data)
+            if(data):
+                error = 'Invalid flight'
+                return render_template('staff/create_flight.html', error=error)
+            else:
+                cursor = conn.cursor()
+                ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+                cursor.execute(ins.format(
+                airline_name,
+                flight_num,
+                departure_airport, departure_time,
+                arrival_airport, arrival_time,
+                price,
+                status,
+                airplane_id))
+                conn.commit()
+                cursor.close()
+                return redirect(url_for('home'))
 
-    error = "FLIGHT DOES NOT EXIST"
-    return render_template('staff/edit_flight.html', error=error)
+        return render_template('staff/create_flight.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
+
+@app.route('/flight/<slug>')
+def lookAtFlight(slug):
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
+        cursor.execute(query.format(slug))
+        data = cursor.fetchone()
+        cursor.close()
+        error = None
+        if (data):
+            return render_template('staff/individual_flight.html', data=data, staff="true")
+        else:
+            error = "FLIGHT DOES NOT EXIST"
+            return render_template('staff/my_flight.html', error=error)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
+
+@app.route('/edit-flight/<slug>', methods=['GET','POST'])
+def editFlight(slug):
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM flight WHERE flight_num = \'{}\'"
+        cursor.execute(query.format(slug))
+        data = cursor.fetchone()
+        cursor.close()
+        error = None
+
+        if (data):
+            if request.method == 'POST':
+                cursor = conn.cursor()
+                query = "DELETE FROM flight WHERE flight_num = \'{}\'"
+                cursor.execute(query.format(slug))
+                cursor.close()
+
+                airline_name = request.form['airline name']
+                flight_num = request.form['flight num']
+                departure_airport = request.form['departure airport']
+                departure_time = request.form['departure time']
+                arrival_airport = request.form['arrival airport']
+                arrival_time = request.form['arrival time']
+                price = request.form['price']
+                status = request.form['status']
+                airplane_id = request.form['airplane id']
+
+                status = request.form['status']
+                cursor = conn.cursor()
+                query = "INSERT INTO flight VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+                cursor.execute(query.format(
+                airline_name,
+                flight_num,
+                departure_airport, departure_time,
+                arrival_airport, arrival_time,
+                price,
+                status,
+                airplane_id))
+                conn.commit()
+                cursor.close()
+                return redirect(url_for('lookAtFlight', slug=slug))
+
+            return render_template('staff/edit_flight.html', data=data)
+
+        error = "FLIGHT DOES NOT EXIST"
+        return render_template('staff/edit_flight.html', error=error)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/add-airplane', methods=['GET','POST'])
 def addAirplane():
-    if request.method == 'POST':
-        airline_name = request.form['airline name']
-        airplane_id = request.form['airplane id']
-        seats = request.form['seats']
+    if (session['type'] == 'staff'):
+        if request.method == 'POST':
+            airline_name = request.form['airline name']
+            airplane_id = request.form['airplane id']
+            seats = request.form['seats']
 
-        cursor = conn.cursor()
-        query = "SELECT * FROM airplane WHERE airplane_id = \'{}\'"
-        cursor.execute(query.format(airplane_id))
-        data = cursor.fetchone()
-        cursor.close()
-        error = None
-
-        if(data):
-            error = 'Invalid airplane'
-            return redirect(url_for('add-airplane', error=error))
-        else:
             cursor = conn.cursor()
-            ins = "INSERT INTO airplane VALUES(\'{}\', \'{}\', \'{}\')"
-            cursor.execute(ins.format(
-               airline_name,
-               airplane_id,
-               seats))
-            conn.commit()
+            query = "SELECT * FROM airplane WHERE airplane_id = \'{}\'"
+            cursor.execute(query.format(airplane_id))
+            data = cursor.fetchone()
             cursor.close()
-            return redirect(url_for('home'))
+            error = None
 
-    return render_template('staff/add_airplane.html')
+            if(data):
+                error = 'Invalid airplane'
+                return redirect(url_for('add-airplane', error=error))
+            else:
+                cursor = conn.cursor()
+                ins = "INSERT INTO airplane VALUES(\'{}\', \'{}\', \'{}\')"
+                cursor.execute(ins.format(
+                airline_name,
+                airplane_id,
+                seats))
+                conn.commit()
+                cursor.close()
+                return redirect(url_for('home'))
+
+        return render_template('staff/add_airplane.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/add-airport', methods=['GET','POST'])
 def addAirport():
-    if request.method == 'POST':
-        airport_name = request.form['airport name']
-        airport_city = request.form['airport city']
+    if (session['type'] == 'staff'):
+        if request.method == 'POST':
+            airport_name = request.form['airport name']
+            airport_city = request.form['airport city']
 
-        cursor = conn.cursor()
-        query = "SELECT * FROM airport WHERE airport_name = \'{}\'"
-        cursor.execute(query.format(airport_name))
-        data = cursor.fetchone()
-        cursor.close()
-        error = None
-
-        if(data):
-            error = 'Invalid airport'
-            return redirect(url_for('add-airport', error=error))
-        else:
             cursor = conn.cursor()
-            ins = "INSERT INTO airport VALUES(\'{}\', \'{}\')"
-            cursor.execute(ins.format(
-               airport_name,
-               airport_city))
-            conn.commit()
+            query = "SELECT * FROM airport WHERE airport_name = \'{}\'"
+            cursor.execute(query.format(airport_name))
+            data = cursor.fetchone()
             cursor.close()
-            return redirect(url_for('home'))
+            error = None
 
-    return render_template('staff/add_airport.html')
+            if(data):
+                error = 'Invalid airport'
+                return redirect(url_for('add-airport', error=error))
+            else:
+                cursor = conn.cursor()
+                ins = "INSERT INTO airport VALUES(\'{}\', \'{}\')"
+                cursor.execute(ins.format(
+                airport_name,
+                airport_city))
+                conn.commit()
+                cursor.close()
+                return redirect(url_for('home'))
+
+        return render_template('staff/add_airport.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/booking-agent', methods=['GET'])
 def bookingAgent():
-    cursor = conn.cursor()
-    query = "SELECT * FROM booking_agent"
-    cursor.execute(query.format())
-    data = cursor.fetchall()
-    cursor.close()
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM booking_agent"
+        cursor.execute(query.format())
+        data = cursor.fetchall()
+        cursor.close()
 
-    cursor = conn.cursor()
-    query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE purchase_date > NOW() - interval 5 MONTH ORDER BY num DESC LIMIT 5"
-    cursor.execute(query.format())
-    top5month = cursor.fetchall()
-    cursor.close()
+        cursor = conn.cursor()
+        query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE purchase_date BETWEEN DATE_SUB(NOW(), INTERVAL 30 MONTH) AND NOW() GROUP BY booking_agent_id ORDER BY num DESC LIMIT 5"
+        cursor.execute(query.format())
+        top5month = cursor.fetchall()
+        cursor.close()
 
-    cursor = conn.cursor()
-    query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE purchase_date > NOW() - interval 1 YEAR ORDER BY num DESC LIMIT 5"
-    cursor.execute(query.format())
-    top5year = cursor.fetchall()
-    cursor.close()
+        print(top5month)
+        cursor = conn.cursor()
+        query = "SELECT booking_agent_id, count(booking_agent_id) AS num FROM purchases WHERE YEAR(purchase_date)= YEAR(CURRENT_DATE) or YEAR(purchase_date)= YEAR(CURRENT_DATE)-1 GROUP BY booking_agent_id ORDER BY num DESC LIMIT 5"
+        cursor.execute(query.format())
+        top5year = cursor.fetchall()
+        cursor.close()
 
-    # cursor = conn.cursor()
-    # query = ""
-    # cursor.execute(query.format())
-    # top5commission = cursor.fetchall()
-    # cursor.close()
+        cursor = conn.cursor()
+        query = "SELECT booking_agent_id, sum(price) as num FROM purchases NATURAL JOIN ticket NATURAL JOIN flight WHERE booking_agent_id is not NULL GROUP BY booking_agent_id ORDER BY num DESC LIMIT 5"
+        cursor.execute(query.format())
+        top5commission = cursor.fetchall()
+        cursor.close()
 
-    return render_template('staff/booking_agent.html', agent_list=data, top5month=top5month, top5year=top5year)
+        return render_template('staff/booking_agent.html', agent_list=data, top5month=top5month, top5year=top5year, top5commission=top5commission)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/customer', methods=['GET'])
 def customer():
-    cursor = conn.cursor()
-    query = "SELECT * FROM customer"
-    cursor.execute(query.format())
-    data = cursor.fetchall()
-    cursor.close()
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM customer"
+        cursor.execute(query.format())
+        data = cursor.fetchall()
+        cursor.close()
 
-    # Will I need GROUP BY???
-    cursor = conn.cursor()
-    query = "SELECT customer_email, count(customer_email) AS num FROM purchases WHERE purchase_date > NOW() - interval 1 YEAR ORDER BY num DESC LIMIT 5"
-    cursor.execute(query.format())
-    customer = cursor.fetchall()
-    cursor.close()
+        cursor = conn.cursor()
+        query = "SELECT customer_email, count(customer_email) AS num FROM purchases WHERE YEAR(purchase_date)= YEAR(CURRENT_DATE) or YEAR(purchase_date)= YEAR(CURRENT_DATE)-1 GROUP BY customer_email ORDER BY num DESC LIMIT 5"
+        cursor.execute(query.format())
+        customer = cursor.fetchall()
+        cursor.close()
 
-    return render_template('staff/customer.html', customer_list=data, topcustomer=customer)
+        return render_template('staff/customer.html', customer_list=data, topcustomer=customer)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
-# TEST
 @app.route('/customer-flight/<slug>', methods=['GET'])
 def individualCustomer(slug):
-    cursor = conn.cursor()
-    query = "SELECT * FROM purchases NATURAL JOIN ticket NATURAL JOIN flight WHERE customer_email=\'{}\' AND airline_name=\'{}\'"
-    cursor.execute(query.format(slug, session['airline']))
-    customer = cursor.fetchall()
-    cursor.close()
-
-    return render_template('staff/individual_customer.html', customer=customer)
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM purchases NATURAL JOIN ticket NATURAL JOIN flight WHERE customer_email=\'{}\' AND airline_name=\'{}\'"
+        cursor.execute(query.format(slug, session['airline']))
+        customer = cursor.fetchall()
+        cursor.close()
+        return render_template('staff/individual_customer.html', customer=customer)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/report', methods=['GET','POST'])
 def report():
-    cursor = conn.cursor()
-    query = "SELECT count(*) FROM ticket"
-    cursor.execute(query.format())
-    data = cursor.fetchall()
-    cursor.close()
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT count(*) FROM ticket"
+        cursor.execute(query.format())
+        data = cursor.fetchall()
+        cursor.close()
 
-    # filter = []
-    # for d in data:
-    #     add = True
-    #     # range of dates
-    #     if (request.form[''] not in d[''] and request.form[''] != ''):
-    #         add = False
-    #     if (request.form[''] not in d[''] and request.form[''] != ''):
-    #         add = False
-    #     if (request.form[''] not in d[''] and request.form[''] != ''):
-    #         add = False
-    #     if (request.form[''] not in d[''] and request.form[''] != ''):
-    #         add = False
-    #     if (add == True):
-    #         filter.append(d)
+        # filter = []
+        # for d in data:
+        #     add = True
+        #     # range of dates
+        #     if (request.form[''] not in d[''] and request.form[''] != ''):
+        #         add = False
+        #     if (request.form[''] not in d[''] and request.form[''] != ''):
+        #         add = False
+        #     if (request.form[''] not in d[''] and request.form[''] != ''):
+        #         add = False
+        #     if (request.form[''] not in d[''] and request.form[''] != ''):
+        #         add = False
+        #     if (add == True):
+        #         filter.append(d)
 
 
-    return render_template('staff/report.html', data=data)
+        return render_template('staff/report.html', data=data)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/revenue', methods=['GET','POST'])
 def revenue():
-  return render_template('staff/revenue.html')
+    if (session['type'] == 'staff'):
+        return render_template('staff/revenue.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/top-destination', methods=['GET','POST'])
 def topDestination():
-    cursor = conn.cursor()
-    query = "SELECT * FROM (SELECT count(arrival_airport) as airport, arrival_airport FROM flight GROUP BY (arrival_airport)) as destination ORDER BY airport DESC LIMIT 3"
-    cursor.execute(query.format())
-    data = cursor.fetchall()
-    cursor.close()
-    
-    return render_template('staff/top_destination.html', data=data)
+    if (session['type'] == 'staff'):
+        cursor = conn.cursor()
+        query = "SELECT * FROM (SELECT count(arrival_airport) as airport, arrival_airport FROM flight GROUP BY (arrival_airport)) as destination ORDER BY airport DESC LIMIT 3"
+        cursor.execute(query.format())
+        data = cursor.fetchall()
+        cursor.close()
+        
+        return render_template('staff/top_destination.html', data=data)
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 # --------------------------------------------------------------------
 # CUSTOMER
@@ -585,7 +640,7 @@ def c_view():
 	try:
 		username = session['value']
 		usertype = session['type']
-		if usertype == "Customer":
+		if usertype == "customer":
 			cursor = conn.cursor()
 			query = 'SELECT airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND status = "upcoming"'
 			cursor.execute(query, (username))
@@ -618,7 +673,7 @@ def c_search():
 def c_searchAuth():
 	try:
 		usertype = session['type']
-		if usertype == "Customer":
+		if usertype == "customer":
 			source = request.form['source']
 			destination = request.form['destination']
 			date = request.form['date']
@@ -642,7 +697,7 @@ def c_searchAuth():
 def c_purchase():
 	try:
 		usertype = session['type']
-		if usertype == "Customer":
+		if usertype == "customer":
 			return render_template('c_purchase.html')
 		else:
 			return render_template('wrong.html')
@@ -655,7 +710,7 @@ def c_purchaseAuth():
 	try:
 		username = session['value']
 		usertype = session['type']
-		if usertype == "Customer":
+		if usertype == "customer":
 			airline_name = request.form['airline name']
 			flight_num = request.form['flight number']
 			cursor = conn.cursor()

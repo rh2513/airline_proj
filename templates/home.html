@@ -3,20 +3,31 @@
 
 {% if "staff" in session['type'] %}
 <div class="btn-group-vertical">
-    <button class="btn btn-secondary"><a href="my-flight" style="color: white; text-decoration:none">View My flights</a></button>
-    <button class="btn btn-secondary"><a href="new-flight" style="color:white; text-decoration:none">Create new flights</a></button>
-    <button class="btn btn-secondary"><a href="add-airplane" style="color:white; text-decoration:none">Add airplane in the system</a></button>
-    <button class="btn btn-secondary"><a href="add-airport" style="color:white; text-decoration:none">Add new airport in the system</a></button>
-    <button class="btn btn-secondary"><a href="booking-agent" style="color:white; text-decoration:none">View all the booking agents</a></button>
-    <button class="btn btn-secondary"><a href="customer" style="color:white; text-decoration:none">View frequent customers</a></button>
-    <button class="btn btn-secondary"><a href="report" style="color:white; text-decoration:none">View reports</a></button>
-    <button class="btn btn-secondary"><a href="revenue" style="color:white; text-decoration:none">Comparison of Revenue earned</a></button>
-    <button class="btn btn-secondary"><a href="top-destination" style="color:white; text-decoration:none">View Top destinations</a></button>
+    <button class="btn btn-secondary"><a href="my-flight" style="color: white; text-decoration:none">View My
+            flights</a></button>
+    <button class="btn btn-secondary"><a href="new-flight" style="color:white; text-decoration:none">Create new
+            flights</a></button>
+    <button class="btn btn-secondary"><a href="add-airplane" style="color:white; text-decoration:none">Add airplane in
+            the system</a></button>
+    <button class="btn btn-secondary"><a href="add-airport" style="color:white; text-decoration:none">Add new airport in
+            the system</a></button>
+    <button class="btn btn-secondary"><a href="booking-agent" style="color:white; text-decoration:none">View all the
+            booking agents</a></button>
+    <button class="btn btn-secondary"><a href="customer" style="color:white; text-decoration:none">View frequent
+            customers</a></button>
+    <button class="btn btn-secondary"><a href="report" style="color:white; text-decoration:none">View
+            reports</a></button>
+    <button class="btn btn-secondary"><a href="revenue" style="color:white; text-decoration:none">Comparison of Revenue
+            earned</a></button>
+    <button class="btn btn-secondary"><a href="top-destination" style="color:white; text-decoration:none">View Top
+            destinations</a></button>
 </div>
-
 
 {% elif "agent" in session['type'] %}
 <p>AGENT</p>
+
+{% elif "customer" in session['type'] %}
+<p>CUSTOMER</p>
 
 {% else %}
 <h1>Flight Tracker</h1>
@@ -24,25 +35,36 @@
 <div class="jumbotron">
     <h3>Search Flight</h3>
     <form method="POST" action="/search-flight" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Airport"
+        <input class="form-control form-control-sm mr-3 w-75" type="text" name="flight_num" placeholder="Flight Number"
             aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Airport"
-            aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date"
-            aria-label="Search">
-        <button class="btn"> Search </button>
-    </form>
-    <br />
-    <h3>Search Status</h3>
-    <form method="POST" action="/search-route" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Flight Number"
-            aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Departure Date"
-            aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" type="text" placeholder="Arrival Date"
+        <!-- <input class="form-control form-control-sm mr-3 w-75" type="text" name="departure_time"
+            placeholder="Departure Time" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" name="arrival_time"
+            placeholder="Arrival Time" aria-label="Search"> -->
+        <input class="form-control form-control-sm mr-3 w-75" type="text" name="departure_airport"
+            placeholder="Departure Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" name="arrival_airport"
+            placeholder="Arrival Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" type="text" name="status" placeholder="Status"
             aria-label="Search">
         <button class="btn"> Search </button>
     </form>
+</div>
+
+<div>
+    {% for d in data %}
+    <div class="jumbotron btn-group inline pull-left">
+        <h4>Flight Num: {{ d.flight_num }}</h4>
+        <h4>Airline Name: {{ d.airline_name }}</h4>
+        <h4>Departure Time: {{ d.departure_time }}</h4>
+        <h4>Arrival Time: {{ d.arrival_time }}</h4>
+        <h4>Departure Airport: {{ d.departure_airport }}</h4>
+        <h4>Arrival Airport: {{ d.arrival_airport }}</h4>
+        <h4>Price: {{ d.price }}</h4>
+        <h4>Status: {{ d.status }}</h4>
+        <h4>Airplane Id: {{ d.airplane_id }}</h4>
+    </div>
+    {% endfor %}
 </div>
 
 {% endif %}

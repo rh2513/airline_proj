@@ -4,7 +4,13 @@
 <a href="/">Go back</a>
 
 <h1>TOP DESTINATIONS</h1>
+<div class="jumbotron">
+    <ol>
+        {% for d in data %}
+        <h2><li>{{ d.arrival_airport }}</li></h2>
+        {% endfor %}
+    </ol>
+</div>
 
-{{data }}
 
 {% endblock %}

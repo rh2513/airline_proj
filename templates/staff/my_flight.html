@@ -7,16 +7,11 @@
 <div class="jumbotron">
     <h3>Search Status</h3>
     <form method="POST" action="/my-flight" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3 w-75" name="flight_num" type="text" placeholder="Flight Number"
-            aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" name="departure_time" type="text"
-            placeholder="Departure Time" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" name="arrival_time" type="text" placeholder="Arrival Time"
-            aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" name="departure_airport" type="text"
-            placeholder="Departure Airport" aria-label="Search">
-        <input class="form-control form-control-sm mr-3 w-75" name="arrival_airport" type="text"
-            placeholder="Arrival Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" name="flight_num" type="text" placeholder="Flight Number" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" name="departure_time" type="text" placeholder="Departure Time" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" name="arrival_time" type="text" placeholder="Arrival Time" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" name="departure_airport" type="text" placeholder="Departure Airport" aria-label="Search">
+        <input class="form-control form-control-sm mr-3 w-75" name="arrival_airport" type="text" placeholder="Arrival Airport" aria-label="Search">
         <button class="btn"> Search </button>
     </form>
 </div>
@@ -24,16 +19,16 @@
 <div>
     {% for d in data %}
     <form action="/flight/{{ d.flight_num }}" method="GET">
-        <button class="jumbotron">
-            <h4>{{ d.flight_num }}</h4>
-            <h4>{{ d.airline_name }}</h4>
-            <h4>{{ d.departure_time }}</h4>
-            <h4>{{ d.arrival_time }}</h4>
-            <h4>{{ d.departure_airport }}</h4>
-            <h4>{{ d.arrival_airport }}</h4>
-            <h4>{{ d.price }}</h4>
-            <h4>{{ d.status }}</h4>
-            <h4>{{ d.airplane_id }}</h4>
+        <button class="jumbotron btn-group inline pull-left">
+            <h4>Flight Num: {{ d.flight_num }}</h4>
+            <h4>Airline Name: {{ d.airline_name }}</h4>
+            <h4>Departure Time: {{ d.departure_time }}</h4>
+            <h4>Arrival Time: {{ d.arrival_time }}</h4>
+            <h4>Departure Airport: {{ d.departure_airport }}</h4>
+            <h4>Arrival Airport: {{ d.arrival_airport }}</h4>
+            <h4>Price: {{ d.price }}</h4>
+            <h4>Status: {{ d.status }}</h4>
+            <h4>Airplane Id: {{ d.airplane_id }}</h4>
         </button>
     </form>
     {% endfor %}

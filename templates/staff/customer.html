@@ -5,13 +5,14 @@
 
 <div class="jumbotron">
         <h5>MOST FREQUENT CUSTOMERS WITHIN LAST YEAR</h5>
-        <ul>
+        <ol>
         {% for customer in topcustomer %}
                 <li>
-                        {{ customer }}
+                        {{ customer.customer_email }} - 
+                        {{ customer.num }}
                 </li>
         {% endfor %}
-        </ul>
+        </ol>
 </div>
 
 <h1>CUSTOMERS LIST</h1>

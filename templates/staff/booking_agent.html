@@ -7,24 +7,24 @@
 
 <div class="jumbotron">
         <h5>TOP 5 BOOKING AGENT IN PAST MONTH</h5>
-        <ul>
+        <ol>
                 {% for agent in top5month %}
                 <li> {{ agent }} </li>
                 {% endfor %}
-        </ul>
+        </ol>
 
         <h5>TOP 5 BOOKING AGENT IN PAST YEAR</h5>
-        <ul>
+        <ol>
                 {% for agent in top5year %}
                 <li> {{ agent }} </li>
                 {% endfor %}
-        </ul>
+        </ol>
         <h5>TOP 5 BOOKING AGENT BASED ON COMMISSION IN PAST YEAR</h5>
-        <!-- <ul>
+        <ol>
                 {% for agent in top5commission %}
                 <li> {{ agent }} </li>
                 {% endfor %}
-        </ul> -->
+        </ol>
 </div>
 
 {% for agent in agent_list %}
