@@ -6,17 +6,17 @@
 <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
     <div class="card card-signin my-5">
         <div class="card-body">
-            <h5 class="card-title text-center">ADD AIRPORT</h5>
+ <h5 class="card-title text-center">ADD AIRPORT</h5>
 
-            {% if error %}
-            <p class="alert alert-danger"><strong>Error:</strong> {{error}} </p>
-            {% endif %}
+ {% if error %}
+ <p class="alert alert-danger"><strong>Error:</strong> {{error}} </p>
+ {% endif %}
 
-            <form method="POST" action="add-airport" class="form-signin">
-                <input class="form-control" type="text" name="airport name" placeholder="Airport Name" required /></br>
-                <input class="form-control" type="text" name="airport city" placeholder="Airport City" required /> </br>
-                <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit" value="Create">Add Airport</button>
-            </form>
+ <form method="POST" action="add-airport" class="form-signin">
+     <input class="form-control" type="text" name="airport name" placeholder="Airport Name" required /></br>
+     <input class="form-control" type="text" name="airport city" placeholder="Airport City" required /> </br>
+     <button class="btn btn-lg btn-primary btn-block text-uppercase" type="submit" value="Create">Add Airport</button>
+ </form>
         </div>
     </div>
 </div>

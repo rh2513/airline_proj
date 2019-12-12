@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+    {% for jsfile_name in script_list %}
+        <script src="{{ host }}/{{ jsfile_name }}.js"></script>
+    {% endfor %}
+</head>
+
+<body>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+	<p><strong>View top 5 customers in the last year</strong></p>
+	<table border="2">
+	<tr>
+		<th>Customer Email</th>
+		<th>Commission</th>
+	</tr>
+	{% for dic in post %}
+	<tr>
+		<td>{{dic.email}}</td>
+		<td>{{dic.commission}}</td>
+	</tr>
+	{% endfor %}
+	</table>
+	{{ myechart|safe }}
+	<a href="/a_best5c">Go back</a>
+</body>
+
+</html>

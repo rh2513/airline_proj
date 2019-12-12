@@ -4,30 +4,51 @@
 {% if "staff" in session['type'] %}
 <div class="btn-group-vertical">
     <button class="btn btn-secondary"><a href="my-flight" style="color: white; text-decoration:none">View My
-            flights</a></button>
+ flights</a></button>
     <button class="btn btn-secondary"><a href="new-flight" style="color:white; text-decoration:none">Create new
-            flights</a></button>
+ flights</a></button>
     <button class="btn btn-secondary"><a href="add-airplane" style="color:white; text-decoration:none">Add airplane in
-            the system</a></button>
+ the system</a></button>
     <button class="btn btn-secondary"><a href="add-airport" style="color:white; text-decoration:none">Add new airport in
-            the system</a></button>
+ the system</a></button>
     <button class="btn btn-secondary"><a href="booking-agent" style="color:white; text-decoration:none">View all the
-            booking agents</a></button>
+ agents</a></button>
     <button class="btn btn-secondary"><a href="customer" style="color:white; text-decoration:none">View frequent
-            customers</a></button>
+ customers</a></button>
     <button class="btn btn-secondary"><a href="report" style="color:white; text-decoration:none">View
-            reports</a></button>
+ reports</a></button>
     <button class="btn btn-secondary"><a href="revenue" style="color:white; text-decoration:none">Comparison of Revenue
-            earned</a></button>
+ earned</a></button>
     <button class="btn btn-secondary"><a href="top-destination" style="color:white; text-decoration:none">View Top
-            destinations</a></button>
+ destinations</a></button>
 </div>
 
 {% elif "agent" in session['type'] %}
 <p>AGENT</p>
+<a class="nav-link">Welcome {{session['email']}}!</a></br>
+<div class="btn-group-vertical">
+    <button class="btn btn-secondary"><a href="/a_view" style="color: white; text-decoration:none">View My
+ flights</a></button>
+    <button class="btn btn-secondary"><a href="/a_purchase" style="color:white; text-decoration:none">Purchase tickets
+ </a></button>
+    <button class="btn btn-secondary"><a href="/a_search" style="color:white; text-decoration:none">Search for flights
+ </a></button>
+    <button class="btn btn-secondary"><a href="/a_com" style="color:white; text-decoration:none">My commission
+ </a></button>
+    <button class="btn btn-secondary"><a href="/a_best5c" style="color:white; text-decoration:none">Top 5 Customers
+ </a></button>
 
 {% elif "customer" in session['type'] %}
-<p>CUSTOMER</p>
+<p>CUSTOMER</p> 
+<a class="nav-link">Welcome {{session['email']}}!</a></br>
+<div class="btn-group-vertical">
+    <button class="btn btn-secondary"><a href="/c_viewflights" style="color: white; text-decoration:none">View My
+ flights</a></button>
+    <button class="btn btn-secondary"><a href="/c_search" style="color:white; text-decoration:none">Search for flights
+ </a></button>
+    <button class="btn btn-secondary"><a href="/c_tracker" style="color:white; text-decoration:none">Track my spending
+ </a></button>
+
 
 {% else %}
 <h1>Flight Tracker</h1>
@@ -36,17 +57,17 @@
     <h3>Search Flight</h3>
     <form method="POST" action="/search-flight" class="form-inline active-purple-4">
         <input class="form-control form-control-sm mr-3 w-75" type="text" name="flight_num" placeholder="Flight Number"
-            aria-label="Search">
+ aria-label="Search">
         <!-- <input class="form-control form-control-sm mr-3 w-75" type="text" name="departure_time"
-            placeholder="Departure Time" aria-label="Search">
+ placeholder="Departure Time" aria-label="Search">
         <input class="form-control form-control-sm mr-3 w-75" type="text" name="arrival_time"
-            placeholder="Arrival Time" aria-label="Search"> -->
+ placeholder="Arrival Time" aria-label="Search"> -->
         <input class="form-control form-control-sm mr-3 w-75" type="text" name="departure_airport"
-            placeholder="Departure Airport" aria-label="Search">
+ placeholder="Departure Airport" aria-label="Search">
         <input class="form-control form-control-sm mr-3 w-75" type="text" name="arrival_airport"
-            placeholder="Arrival Airport" aria-label="Search">
+ placeholder="Arrival Airport" aria-label="Search">
         <input class="form-control form-control-sm mr-3 w-75" type="text" name="status" placeholder="Status"
-            aria-label="Search">
+ aria-label="Search">
         <button class="btn"> Search </button>
     </form>
 </div>

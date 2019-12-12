@@ -3,27 +3,27 @@
 
 <a href="/">Go back</a>
 
-<h1>BOOKING AGENT LIST</h1>
+<h1>agent LIST</h1>
 
 <div class="jumbotron">
-        <h5>TOP 5 BOOKING AGENT IN PAST MONTH</h5>
+        <h5>TOP 5 agent IN PAST MONTH</h5>
         <ol>
-                {% for agent in top5month %}
-                <li> {{ agent }} </li>
-                {% endfor %}
+     {% for agent in top5month %}
+     <li> {{ agent }} </li>
+     {% endfor %}
         </ol>
 
-        <h5>TOP 5 BOOKING AGENT IN PAST YEAR</h5>
+        <h5>TOP 5 agent IN PAST YEAR</h5>
         <ol>
-                {% for agent in top5year %}
-                <li> {{ agent }} </li>
-                {% endfor %}
+     {% for agent in top5year %}
+     <li> {{ agent }} </li>
+     {% endfor %}
         </ol>
-        <h5>TOP 5 BOOKING AGENT BASED ON COMMISSION IN PAST YEAR</h5>
+        <h5>TOP 5 agent BASED ON COMMISSION IN PAST YEAR</h5>
         <ol>
-                {% for agent in top5commission %}
-                <li> {{ agent }} </li>
-                {% endfor %}
+     {% for agent in top5commission %}
+     <li> {{ agent }} </li>
+     {% endfor %}
         </ol>
 </div>
 

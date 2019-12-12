@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Flask Template Example</title>
+    <title>Airline Reservation System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -12,39 +12,39 @@
 <body>
     <div class="container">
         <nav class="navbar navbar-expand navbar-dark bg-dark">
-            <a class="navbar-brand" href="/">HOMEPAGE</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample02"
-                aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarsExample02">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">HOME</a>
-                    </li>
-                </ul>
-                {% if session['email'] %}
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="nav-item">
-                        <a class="nav-link">Welcome {{session['email']}}!</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">Logout</a>
-                    </li>
-                </ul>
+ <a class="navbar-brand" href="/">HOMEPAGE</a>
+ <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample02"
+     aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
+     <span class="navbar-toggler-icon"></span>
+ </button>
+ <div class="collapse navbar-collapse" id="navbarsExample02">
+     <ul class="navbar-nav mr-auto">
+         <li class="nav-item">
+  <a class="nav-link" href="/">HOME</a>
+         </li>
+     </ul>
+     {% if session['email'] %}
+     <ul class="nav navbar-nav navbar-right">
+         <li class="nav-item">
+  <a class="nav-link">Welcome {{session['email']}}!</a>
+         </li>
+         <li class="nav-item">
+  <a class="nav-link" href="/logout">Logout</a>
+         </li>
+     </ul>
 
-                {% else %}
-                <ul class="nav navbar-nav navbar-right">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
-                    </li>
-                    <li>
-                        <a class="nav-link" href="/register">Register</a>
-                    </li>
-                </ul>
+     {% else %}
+     <ul class="nav navbar-nav navbar-right">
+         <li class="nav-item">
+  <a class="nav-link" href="/login">Login</a>
+         </li>
+         <li>
+  <a class="nav-link" href="/register">Register</a>
+         </li>
+     </ul>
 
-                {% endif %}
-            </div>
+     {% endif %}
+ </div>
         </nav>
 
         <br>

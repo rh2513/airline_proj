@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+</head>
+
+<body>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+	<table border="2">
+	<tr>
+		<th>Total earned</th>
+		<th>Amount of tickets sold</th>
+		<th>Average commission earned per ticket</th>
+	</tr>
+	<tr>
+		<td>{{post.Total}}</td>
+		<td>{{post.Amount}}</td>
+		<td>{{post.Average}}</td>
+	</tr>
+	</table>
+	<a href="/a_comdetail">View more detailed information here..</a></br>
+	<a href="/">Go back</a>
+</body>
+</html>

@@ -7,14 +7,14 @@
 
 <body>
 <form action="/c_searchAuth" method="POST">
-	<input type="text" name="source" placeholder="Source" required/></br>
-	<input type="text" name="destination" placeholder="Destination" required/></br>
-	<input type="text" name="date" placeholder="Date" required/></br>
-	<input type="submit" value=Search /></br>
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
+       <input type="text" name="source" placeholder="Source" required/></br>
+       <input type="text" name="destination" placeholder="Destination" required/></br>
+       <input type="text" name="date" placeholder="Date" required/></br>
+       <input type="submit" value=Search /></br>
+       {% if error %}
+   <p class="error"><strong>Error:</strong> {{error}}</p>
+       {% endif %}
 </form>
-<a href="/c_home">Go back</a>
+<a href="/">Go back</a>
 </body>
 </html>

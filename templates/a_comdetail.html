@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+</head>
+
+<body>
+<form action="a_comdAuth" method="POST">
+	<input type="text" name="start" placeholder="start date" required/></br>
+	<input type="text" name="end" placeholder="end date" required/></br>
+	<input type="submit" value=Search /></br>
+	{% if error %}
+		<p class="error"><strong>Error:</strong> {{error}}</p>
+	{% endif %}
+	<table border="2">
+	<tr>
+		<th>Total earned</th>
+		<th>Amount of tickets sold</th>
+	</tr>
+	{% if post %}
+	<tr>
+		<td>{{post.Total}}</td>
+		<td>{{post.Amount}}</td>
+	</tr>
+	{% endif %}
+	</table>
+</form>
+<a href="/a_com">Go back</a>
+</body>
+</html>

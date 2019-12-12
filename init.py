@@ -1,11 +1,12 @@
-# import packages from Flask Lib
+
+#import packages from Flask Lib
 from flask import Flask, render_template, request, session, url_for, redirect, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import hashlib
 
-# from pyecharts import Bar
-# from pyecharts import Pie
-# from pyecharts import Page
+from pyecharts import Bar
+from pyecharts import Pie
+from pyecharts import Page
 import random
 
 import pymysql.cursors
@@ -13,12 +14,12 @@ import pymysql.cursors
 REMOTE_HOST = "https://pyecharts.github.io/assets/js"
 
 conn = pymysql.connect(host='localhost',
-                user='root',
-                port=8889,
-                password='root',
-                db='airport_proj',
-                charset='utf8mb4',
-                cursorclass=pymysql.cursors.DictCursor)
+     user='root',
+     port=3306,
+     password='',
+     db='airport_proj',
+     charset='utf8mb4',
+     cursorclass=pymysql.cursors.DictCursor)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -53,9 +54,9 @@ def agent_register():
         email = request.form['email']
         password = request.form['password']
         password_confirmation = request.form['password confirmation']
-        booking_agent_id = request.form['booking agent id']
+        booking_agent_id = request.form['agent id']
 
-        if password != password_confirmation:
+        if password != password_confirmation:                             
             flash("Password must match")
             return redirect(url_for('agent_register'))
 
@@ -126,13 +127,13 @@ def customer_register():
             flash("Password must match")
             return redirect(url_for('customer_register'))
 
-        pw_hash = hashlib.md5(password.encode().hexdigest()) 
+            pw_hash = hashlib.md5(password.encode().hexdigest()) 
 
-        cursor = conn.cursor()
-        query = "SELECT * FROM customer WHERE email = \'{}\'"
-        cursor.execute(query.format(email))
-        data = cursor.fetchone()
-        error = None
+            cursor = conn.cursor()
+            query = "SELECT * FROM customer WHERE email = \'{}\'"
+            cursor.execute(query.format(email))
+            data = cursor.fetchone()
+            error = None
 
         if(data):
             error = "This user already exists"
@@ -169,7 +170,8 @@ def customer_login():
         if(data):
             session['email'] = email
             session['type'] = 'customer'
-            return redirect(url_for('home'))
+            return render_template('home.html')
+            #return redirect(url_for('home'))
         else:
             error = 'Invalid login or username'
             return redirect(url_for('login', error=error))
@@ -206,11 +208,11 @@ def staff_register():
         else:
             ins = "INSERT INTO airline_staff VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
             cursor.execute(ins.format(
-               username,
-               pw_hash,
-               first_name, last_name,
-               date_of_birth,
-               airline_name))
+                username,
+                pw_hash,
+                first_name, last_name,
+                date_of_birth,
+                airline_name))
             conn.commit()
             cursor.close()
             return redirect(url_for('login'))
@@ -357,27 +359,27 @@ def newFlight():
             cursor.close()
             error = None
 
-            if(data):
-                error = 'Invalid flight'
-                return render_template('staff/create_flight.html', error=error)
-            else:
-                cursor = conn.cursor()
-                ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
-                cursor.execute(ins.format(
-                airline_name,
-                flight_num,
-                departure_airport, departure_time,
-                arrival_airport, arrival_time,
-                price,
-                status,
-                airplane_id))
-                conn.commit()
-                cursor.close()
-                return redirect(url_for('home'))
+        if(data):
+            error = 'Invalid flight'
+            return render_template('staff/create_flight.html', error=error)
+        else:
+            cursor = conn.cursor()
+            ins = "INSERT INTO flight VALUES(\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+            cursor.execute(ins.format(
+            airline_name,
+            flight_num,
+            departure_airport, departure_time,
+            arrival_airport, arrival_time,
+            price,
+            status,
+            airplane_id))
+            conn.commit()
+            cursor.close()
+            return redirect(url_for('home'))
 
-        return render_template('staff/create_flight.html')
-    error = 'Staff does not exist'
-    return redirect(url_for('login', error=error))
+            return render_template('staff/create_flight.html')
+            error = 'Staff does not exist'
+            return redirect(url_for('login', error=error))
 
 @app.route('/flight/<slug>')
 def lookAtFlight(slug):
@@ -408,40 +410,40 @@ def editFlight(slug):
 
         if (data):
             if request.method == 'POST':
-                cursor = conn.cursor()
-                query = "DELETE FROM flight WHERE flight_num = \'{}\'"
-                cursor.execute(query.format(slug))
-                cursor.close()
+                    cursor = conn.cursor()
+                    query = "DELETE FROM flight WHERE flight_num = \'{}\'"
+                    cursor.execute(query.format(slug))
+                    cursor.close()
 
-                airline_name = request.form['airline name']
-                flight_num = request.form['flight num']
-                departure_airport = request.form['departure airport']
-                departure_time = request.form['departure time']
-                arrival_airport = request.form['arrival airport']
-                arrival_time = request.form['arrival time']
-                price = request.form['price']
-                status = request.form['status']
-                airplane_id = request.form['airplane id']
+                    airline_name = request.form['airline name']
+                    flight_num = request.form['flight num']
+                    departure_airport = request.form['departure airport']
+                    departure_time = request.form['departure time']
+                    arrival_airport = request.form['arrival airport']
+                    arrival_time = request.form['arrival time']
+                    price = request.form['price']
+                    status = request.form['status']
+                    airplane_id = request.form['airplane id']
 
-                status = request.form['status']
-                cursor = conn.cursor()
-                query = "INSERT INTO flight VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
-                cursor.execute(query.format(
-                airline_name,
-                flight_num,
-                departure_airport, departure_time,
-                arrival_airport, arrival_time,
-                price,
-                status,
-                airplane_id))
-                conn.commit()
-                cursor.close()
-                return redirect(url_for('lookAtFlight', slug=slug))
+                    status = request.form['status']
+                    cursor = conn.cursor()
+                    query = "INSERT INTO flight VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\')"
+                    cursor.execute(query.format(
+                    airline_name,
+                    flight_num,
+                    departure_airport, departure_time,
+                    arrival_airport, arrival_time,
+                    price,
+                    status,
+                    airplane_id))
+                    conn.commit()
+                    cursor.close()
+        return redirect(url_for('lookAtFlight', slug=slug))
 
-            return render_template('staff/edit_flight.html', data=data)
+    return render_template('staff/edit_flight.html', data=data)
 
-        error = "FLIGHT DOES NOT EXIST"
-        return render_template('staff/edit_flight.html', error=error)
+    error = "FLIGHT DOES NOT EXIST"
+    return render_template('staff/edit_flight.html', error=error)
     error = 'Staff does not exist'
     return redirect(url_for('login', error=error))
 
@@ -460,23 +462,23 @@ def addAirplane():
             cursor.close()
             error = None
 
-            if(data):
-                error = 'Invalid airplane'
-                return redirect(url_for('add-airplane', error=error))
-            else:
-                cursor = conn.cursor()
-                ins = "INSERT INTO airplane VALUES(\'{}\', \'{}\', \'{}\')"
-                cursor.execute(ins.format(
-                airline_name,
-                airplane_id,
-                seats))
-                conn.commit()
-                cursor.close()
-                return redirect(url_for('home'))
+        if(data):
+            error = 'Invalid airplane'
+            return redirect(url_for('add-airplane', error=error))
+        else:
+            cursor = conn.cursor()
+            ins = "INSERT INTO airplane VALUES(\'{}\', \'{}\', \'{}\')"
+            cursor.execute(ins.format(
+            airline_name,
+            airplane_id,
+            seats))
+            conn.commit()
+            cursor.close()
+            return redirect(url_for('home'))
 
-        return render_template('staff/add_airplane.html')
-    error = 'Staff does not exist'
-    return redirect(url_for('login', error=error))
+            return render_template('staff/add_airplane.html')
+            error = 'Staff does not exist'
+            return redirect(url_for('login', error=error))
 
 @app.route('/add-airport', methods=['GET','POST'])
 def addAirport():
@@ -492,18 +494,18 @@ def addAirport():
             cursor.close()
             error = None
 
-            if(data):
-                error = 'Invalid airport'
-                return redirect(url_for('add-airport', error=error))
-            else:
-                cursor = conn.cursor()
-                ins = "INSERT INTO airport VALUES(\'{}\', \'{}\')"
-                cursor.execute(ins.format(
-                airport_name,
-                airport_city))
-                conn.commit()
-                cursor.close()
-                return redirect(url_for('home'))
+        if(data):
+            error = 'Invalid airport'
+            return redirect(url_for('add-airport', error=error))
+        else:
+            cursor = conn.cursor()
+            ins = "INSERT INTO airport VALUES(\'{}\', \'{}\')"
+            cursor.execute(ins.format(
+            airport_name,
+            airport_city))
+            conn.commit()
+            cursor.close()
+            return redirect(url_for('home'))
 
         return render_template('staff/add_airport.html')
     error = 'Staff does not exist'
@@ -623,57 +625,209 @@ def topDestination():
 
 # --------------------------------------------------------------------
 # CUSTOMER
-
-@app.route('/customer_home')
-def customer_home():
-	try:
-		usertype = session['type']
-		if usertype == "customer":
-			return render_template('c_home.html')
-		else:
-			return render_template('error.html')
-	except KeyError:
-		return render_template('error.html')
-
 @app.route('/c_viewflights')
-def c_view():
-	try:
-		username = session['value']
+def c_viewflights():
+    if (session['type'] == 'customer'):
+        cursor = conn.cursor()
+        query = 'SELECT airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND status = "Upcoming"'
+        cursor.execute(query, (session['email']))
+        data = cursor.fetchall()
+        cursor.close()
+        error = None
+        if (data):
+            return render_template('c_viewflights.html', post = data)
+        else:
+            error = "You do not have any flight scheduled right now."
+            return render_template('c_viewflights.html', error = error)
+    else:
+        return render_template('error.html')
+   
+
+@app.route('/c_search')
+def c_search():
+   if session['type'] == "customer":
+          return render_template('c_search.html')
+   else:
+          return render_template('error.html')
+       
+   return render_template('error.html')
+
+
+@app.route('/c_searchAuth', methods = ['GET','POST'])
+def c_Auth():
+       
+   if session['type'] == "customer":
+          source = request.form['source']
+          destination = request.form['destination']
+          date = request.form['date']
+          cursor = conn.cursor()
+          query = "SELECT flight.* FROM flight, airport as A1, airport as A2 WHERE departure_airport = A1.airport_name and arrival_airport = A2.airport_name and status = 'Upcoming' and (departure_airport = %s or A1.airport_city = %s) and (arrival_airport = %s or A2.airport_city = %s) and date(departure_time) = %s"
+          cursor.execute(query, (source, source, destination, destination, date))
+          data = cursor.fetchall()
+          cursor.close()
+          error = None
+          if (data):
+            return render_template('c_purchase.html', post = data)
+          else:
+            error = "Flight does not exist"
+            return render_template("c_search.html", error = error)
+   else:
+        return render_template('error.html')
+       
+   return render_template('error.html')
+
+@app.route('/c_purchase')
+def c_purchase():
+       
+   usertype = session['type']
+   if usertype == "customer":
+          return render_template('c_purchase.html')
+   else:
+          return render_template('error.html')
+       
+   return render_template('error.html')
+
+
+@app.route('/c_buyAuth', methods = ['GET', 'POST'])
+def c_buyAuth():
+   username = session['email']
+   usertype = session['type']
+   if (usertype == "customer"):
+          airline_name = request.form['airline']
+          flight_num = request.form['flight_num']
+          cursor = conn.cursor()
+          query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s and ticket_id not in (SELECT ticket_id from purchases)'
+          cursor.execute(query, (airline_name, flight_num))
+          data = cursor.fetchone()
+          print(data)
+          cursor.close()
+          error = None
+          if(data):
+            ticket_id = data['ticket_id']
+            cursor = conn.cursor()
+            query = 'INSERT INTO purchases values (%s, %s, null, CURRENT_DATE())'
+            cursor.execute(query, (ticket_id, username))
+            conn.commit()
+            cursor.close()
+            return render_template('home.html', post = "Purchase successful!")
+          else:
+            error = "No tickets available."
+            return render_template('c_purchase.html', error = error)
+   else:
+          return render_template('error.html')
+
+
+@app.route('/c_tracker')
+def c_tracker():
+
+   usertype = session['type']
+   if usertype == "customer":
+          cursor = conn.cursor()
+          query = 'SELECT sum(price) as sum FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE())'
+          cursor.execute(query, session['email'])
+          data = cursor.fetchall()
+          cursor.close()
+          error = None
+          print(data)
+          if (data):
+            cursor = conn.cursor()
+            query = 'SELECT month(purchase_date) as month, sum(price) as mon FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 6 MONTH) AND CURRENT_DATE()) GROUP BY month ORDER BY month'
+            cursor.execute(query, (session['email']))
+            bardata = cursor.fetchall()
+            cursor.close()
+            print(bardata)
+            bar = Bar('Track my Spending within 6 months')
+            xbar = []
+            ybar =[]
+            for dic in bardata:
+                xbar.append(dic['month'])
+                ybar.append(int(dic['mon']))
+            print(xbar,ybar)
+            bar.add('money spent',xbar,ybar)
+            return render_template('c_tracker.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+          else:
+            error = "You did not purchase any tickets."
+            return render_template('c_tracker.html', error = error)
+   else:
+          return render_template('error.html')
+
+@app.route('/c_details')
+def c_details():
+       return render_template('c_details.html')
+
+@app.route('/c_detailsAuth', methods = ['GET', 'POST'])
+def c_detailsAuth():
+   username = session['email']
+   usertype = session['type']
+   if usertype == "customer":
+          date_start = request.form["date start"]
+          date_end = request.form["date end"]
+          cursor = conn.cursor()
+          query = 'SELECT sum(price) as sum FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN %s AND %s)'
+          cursor.execute(query, (username, date_start, date_end))
+          data = cursor.fetchall()
+          cursor.close()
+          error = None
+          if (data):
+            cursor = conn.cursor()
+            query = 'SELECT month(purchase_date) as month, sum(price) as mon FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN %s AND %s) GROUP BY month ORDER BY month'
+            cursor.execute(query, (username, date_start, date_end))
+            bardata = cursor.fetchall()
+            cursor.close()
+            bar = Bar('Track my Spending during the follow dates:')
+            xbar = []
+            ybar =[]
+            for dic in bardata:
+                xbar.append(dic['month'])
+                ybar.append(int(dic['mon']))
+                bar.add('money',xbar,ybar)
+            return render_template('c_details.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+          else:
+            error = "You have not purchased a ticket."
+            return render_template('c_details.html', error = error)
+   else:
+          return render_template('error.html')
+
+# ----------------------------------------------
+# AGENT
+@app.route('/a_view')
+def a_view():
+	
+		username = session['email']
 		usertype = session['type']
-		if usertype == "customer":
+		if usertype == "agent":
 			cursor = conn.cursor()
-			query = 'SELECT airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND status = "upcoming"'
+			query = 'SELECT customer_email, airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases natural join booking_agent WHERE email = %s AND status = "upcoming"'
 			cursor.execute(query, (username))
 			data = cursor.fetchall()
 			cursor.close()
 			error = None
 			if (data):
-				return render_template('c_viewflights.html', post = data)
+				return render_template('a_view.html', post = data)
 			else:
-				error = "You do not have any flight right now. Go get some."
-				return render_template('c_viewflights.html', error = error)
+				error = "No flights purchased for customers."
+				return render_template('a_view.html', error = error)
 		else:
 			return render_template('error.html')
-	except KeyError:
+	
 		return render_template('error.html')
 
-@app.route('/c_search')
-def c_search():
-	try:
+@app.route('/a_search')
+def a_search():
+	
 		usertype = session['type']
-		if usertype == "customer":
-			return render_template('c_search.html')
+		if usertype == "agent":
+			return render_template('a_search.html')
 		else:
 			return render_template('error.html')
-	except KeyError:
+	
 		return render_template('error.html')
 
-
-@app.route('/c_searchAuth', methods = ['GET','POST'])
-def c_searchAuth():
-	try:
+@app.route('/a_searchAuth', methods = ['GET','POST'])
+def a_searchAuth():
+	
 		usertype = session['type']
-		if usertype == "customer":
+		if usertype == "agent":
 			source = request.form['source']
 			destination = request.form['destination']
 			date = request.form['date']
@@ -684,33 +838,31 @@ def c_searchAuth():
 			cursor.close()
 			error = None
 			if (data):
-				return render_template('c_purchase.html', post = data)
+				return render_template('a_purchase.html', post = data)
 			else:
-				error = "No such flight"
-				return render_template("c_search.html", error = error)
+				error = "Flight does not exist"
+				return render_template("a_search.html", error = error)
 		else:
-			return render_template('wrong.html')
-	except KeyError:
-		return render_template('wrong.html')
+			return render_template('error.html')
+	
+		return render_template('error.html')
 
-@app.route('/c_purchase')
-def c_purchase():
-	try:
+@app.route('/a_purchase')
+def a_purchase():
+	
 		usertype = session['type']
-		if usertype == "customer":
-			return render_template('c_purchase.html')
+		if usertype == "agent":
+			return render_template('a_purchase.html')
 		else:
-			return render_template('wrong.html')
-	except KeyError:
-		return render_template('wrong.html')
-
-
-@app.route('/c_purchaseAuth', methods = ['GET', 'POST'])
-def c_purchaseAuth():
-	try:
-		username = session['value']
+			return render_template('error.html')
+	
+		return render_template('error.html')
+	
+@app.route('/a_purchaseAuth', methods = ['GET', 'POST'])
+def a_purchaseAuth():
+	
 		usertype = session['type']
-		if usertype == "customer":
+		if usertype == "agent":
 			airline_name = request.form['airline name']
 			flight_num = request.form['flight number']
 			cursor = conn.cursor()
@@ -720,98 +872,178 @@ def c_purchaseAuth():
 			cursor.close()
 			error = None
 			if(data):
-				ticket_id = data['ticket_id']
-				cursor = conn.cursor()
-				query = 'INSERT INTO purchases values (%s, %s, null, CURRENT_DATE())'
-				cursor.execute(query, (ticket_id, username))
-				conn.commit()
-				cursor.close()
-				return render_template('c_home.html', post = "Purchase successful!")
+				return render_template('a_success.html', post = data)
 			else:
-				error = "No tickets available."
-				return render_template('c_purchase.html', error = error)
+				error = "No tickets left"
+				return render_template('a_purchase.html', error = error)
 		else:
 			return render_template('error.html')
-	except KeyError:
+	
 		return render_template('error.html')
 
+@app.route('/a_success')
+def a_buy():
+	
+		usertype = session['type']
+		if usertype == "agent":
+			return render_template('a_success.html')
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
 
-# @app.route('/c_spending')
-# def c_spending():
-# 	try:
-# 		username = session['value']
-# 		usertype = session['type']
-# 		if usertype == "Customer":
-# 			cursor = conn.cursor()
-# 			query = 'SELECT sum(price) as sum FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE())'
-# 			cursor.execute(query, (username))
-# 			data = cursor.fetchall()
-# 			cursor.close()
-# 			error = None
-# 			print(data)
-# 			if (data):
-# 				cursor = conn.cursor()
-# 				query = 'SELECT month(purchase_date) as month, sum(price) as money1 FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 6 MONTH) AND CURRENT_DATE()) GROUP BY month ORDER BY month'
-# 				cursor.execute(query, (username))
-# 				bardata = cursor.fetchall()
-# 				cursor.close()
-# 				print(bardata)
-# 				bar = Bar('Track my Spending within 6 months')
-# 				xbar = []
-# 				ybar =[]
-# 				for dic in bardata:
-# 					xbar.append(dic['month'])
-# 					ybar.append(int(dic['money1']))
-# 				print(xbar,ybar)
-# 				bar.add('money',xbar,ybar)
-# 				return render_template('c_tracker.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
-# 			else:
-# 				error = "You have not get any ticket."
-# 				return render_template('c_tracker.html', error = error)
-# 		else:
-# 			return render_template('error.html')
-# 	except KeyError:
-# 		return render_template('error.html')
+@app.route('/a_successAuth', methods = ['GET', 'POST'])
+def a_successAuth():
+	
+		username = session['email']
+		usertype = session['type']
+		if usertype == "agent":
+			cursor = conn.cursor()
+			query = 'SELECT booking_agent_id FROM booking_agent WHERE email = %s'
+			cursor.execute(query, (username))
+			data = cursor.fetchone()
+			cursor.close()
+			booking_agent_id = data['booking_agent_id']
+			ticket_id = request.form['ticket id']
+			customer = request.form['customer']
+			cursor = conn.cursor()
+			query = 'INSERT INTO purchases values (%s, %s, %s, CURRENT_DATE())'
+			cursor.execute(query, (ticket_id, customer, booking_agent_id))
+			conn.commit()
+			cursor.close()
+			return render_template('\.html', post = "Successful!")
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
 
-@app.route('/c_details')
-def c_details():
-	return render_template('c_details.html')
+@app.route('/a_com')
+def a_commission():
+	
+		username = session['email']
+		usertype = session['type']
+		if usertype == "agent":
+			cursor = conn.cursor()
+			query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount, 0.1 * sum(price)/count(ticket_id) as Average FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE())"
+			cursor.execute(query, (username))
+			data = cursor.fetchone()
+			conn.commit()
+			cursor.close()
+			error = None
+			if(data):
+				return render_template('a_com.html', post = data)
+			else:
+				error = "No commission yet, try harder."
+				return render_template('a_com.html', error = error)
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
 
-# @app.route('/c_detailsAuth', methods = ['GET', 'POST'])
-# def c_detailsAuth():
-# 	try:
-# 		username = session['value']
-# 		usertype = session['type']
-# 		if usertype == "Customer":
-# 			date_start = request.form["date start"]
-# 			date_end = request.form["date end"]
-# 			cursor = conn.cursor()
-# 			query = 'SELECT sum(price) as sum FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN %s AND %s)'
-# 			cursor.execute(query, (username, date_start, date_end))
-# 			data = cursor.fetchall()
-# 			cursor.close()
-# 			error = None
-# 			if (data):
-# 				cursor = conn.cursor()
-# 				query = 'SELECT month(purchase_date) as month, sum(price) as money1 FROM flight natural join ticket natural join purchases WHERE customer_email = %s AND (purchase_date BETWEEN %s AND %s) GROUP BY month ORDER BY month'
-# 				cursor.execute(query, (username, date_start, date_end))
-# 				bardata = cursor.fetchall()
-# 				cursor.close()
-# 				bar = Bar('Track my Spending in a range')
-# 				xbar = []
-# 				ybar =[]
-# 				for dic in bardata:
-# 					xbar.append(dic['month'])
-# 					ybar.append(int(dic['money1']))
-# 				bar.add('money',xbar,ybar)
-# 				return render_template('c_details.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
-# 			else:
-# 				error = "You have not get any ticket."
-# 				return render_template('c_details.html', error = error)
-# 		else:
-# 			return render_template('error.html')
-# 	except KeyError:
-# 		return render_template('error.html')
+@app.route('/a_comdetail')
+def a_commissiondetail():
+	
+		usertype = session['type']
+		if usertype == "agent":
+			return render_template('a_comdetail.html')
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
+
+@app.route('/a_comdAuth', methods = ['GET', 'POST'])
+def a_comdAuth():
+	
+		username = session['email']
+		usertype = session['type']
+		if usertype == "agent":
+			start = request.form['start date']
+			end = request.form['end date']
+			cursor = conn.cursor()
+			query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN %s AND %s)"
+			cursor.execute(query, (username, start, end))
+			data = cursor.fetchone()
+			conn.commit()
+			cursor.close()
+			error = None
+			if(data):
+				return render_template('a_comdetail.html', post = data)
+			else:
+				error = "No commission yet. Try harder..."
+				return render_template('a_comdetail.html', error = error)
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
+
+@app.route('/a_best5c')
+def a_top():
+	
+		usertype = session['type']
+		if usertype == "agent":
+			return render_template('a_best5c.html')
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
+
+@app.route('/a_bestmonth')
+def a_topmonth():
+	
+		username = session['email']
+		usertype = session['type']
+		if usertype == "agent":
+			cursor = conn.cursor()
+			query = "SELECT customer_email as email, count(ticket_id) as num FROM purchases, booking_agent WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 6 MONTH) AND CURRENT_DATE())  GROUP BY customer_email ORDER BY count(ticket_id) DESC LIMIT 5"
+			cursor.execute(query, (username))
+			data = cursor.fetchall()
+			cursor.close()
+			error = None
+			if (data):
+				bar = Bar('View top Customers in the past 6 months')
+				xbar = []
+				ybar =[]
+				for dic in data:
+					xbar.append(dic['email'])
+					ybar.append(int(dic['num']))
+				bar.add('ticket number',xbar,ybar)
+				return render_template('a_bestmonth.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+			else:
+				error = "No customer data available."
+				return render_template('a_bestmonth.html', error = error)
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
+
+@app.route('/a_bestyear')
+def a_topyear():
+	
+		username = session['email']
+		usertype = session['type']
+		if usertype == "agent":
+			cursor = conn.cursor()
+			query = "SELECT customer_email as email, sum(price) * 0.1 as commission FROM purchases, booking_agent, flight, ticket WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND ticket.ticket_id = purchases.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE()) GROUP BY customer_email ORDER BY sum(price) * 0.1 DESC LIMIT 5"
+			cursor.execute(query, (username))
+			data = cursor.fetchall()
+			cursor.close()
+			error = None
+			if (data):
+				bar = Bar('View top Customers in the last year')
+				xbar = []
+				ybar =[]
+				for dic in data:
+					xbar.append(dic['email'])
+					ybar.append(int(dic['commission']))
+				bar.add('commission',xbar,ybar)
+				return render_template('a_bestyear.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+			else:
+				error = "No customer data available"
+				return render_template('a_bestyear.html', error = error)
+		else:
+			return render_template('error.html')
+	
+		return render_template('error.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

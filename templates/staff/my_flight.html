@@ -20,15 +20,15 @@
     {% for d in data %}
     <form action="/flight/{{ d.flight_num }}" method="GET">
         <button class="jumbotron btn-group inline pull-left">
-            <h4>Flight Num: {{ d.flight_num }}</h4>
-            <h4>Airline Name: {{ d.airline_name }}</h4>
-            <h4>Departure Time: {{ d.departure_time }}</h4>
-            <h4>Arrival Time: {{ d.arrival_time }}</h4>
-            <h4>Departure Airport: {{ d.departure_airport }}</h4>
-            <h4>Arrival Airport: {{ d.arrival_airport }}</h4>
-            <h4>Price: {{ d.price }}</h4>
-            <h4>Status: {{ d.status }}</h4>
-            <h4>Airplane Id: {{ d.airplane_id }}</h4>
+ <h4>Flight Num: {{ d.flight_num }}</h4>
+ <h4>Airline Name: {{ d.airline_name }}</h4>
+ <h4>Departure Time: {{ d.departure_time }}</h4>
+ <h4>Arrival Time: {{ d.arrival_time }}</h4>
+ <h4>Departure Airport: {{ d.departure_airport }}</h4>
+ <h4>Arrival Airport: {{ d.arrival_airport }}</h4>
+ <h4>Price: {{ d.price }}</h4>
+ <h4>Status: {{ d.status }}</h4>
+ <h4>Airplane Id: {{ d.airplane_id }}</h4>
         </button>
     </form>
     {% endfor %}

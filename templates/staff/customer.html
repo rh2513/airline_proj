@@ -7,10 +7,10 @@
         <h5>MOST FREQUENT CUSTOMERS WITHIN LAST YEAR</h5>
         <ol>
         {% for customer in topcustomer %}
-                <li>
-                        {{ customer.customer_email }} - 
-                        {{ customer.num }}
-                </li>
+     <li>
+  {{ customer.customer_email }} - 
+  {{ customer.num }}
+     </li>
         {% endfor %}
         </ol>
 </div>
@@ -19,10 +19,10 @@
 {% for customer in customer_list %}
 <form action="/customer-flight/{{ customer.email }}" method="GET">
         <button class="jumbotron">
-                {{ customer.email }}
-                {{ customer.name }}
-                {{ customer.passport_country }}
-                {{ customer.phone_number }}
+     {{ customer.email }}
+     {{ customer.name }}
+     {{ customer.passport_country }}
+     {{ customer.phone_number }}
         </button>
 </form>
 {% endfor %}
