@@ -8,8 +8,8 @@
 <body>
 <form action="/c_buyAuth" method="POST">
    <input type="text" name="airline" placeholder="airline name" required/></br>
-	   <input type="text" name="flight_num" placeholder="flight number" required/></br>
-	   <input type="number" name="ticket_id" placeholder = "ticket_id" required/></br>
+       <input type="text" name="flight_num" placeholder="flight number" required/></br>
+       <input type="number" name="ticket_id" placeholder = "ticket_id" required/></br>
        <input type="submit" value= Purchase /></br>
        {% if error %}
    <p class="error"><strong>Error:</strong> {{error}}</p>

@@ -7,39 +7,39 @@
 
 <body>
 <form action="/a_purchaseAuth" method="POST">
-	<input type="text" name="airline name" placeholder="airline name" required/></br>
-	<input type="text" name="flight number" placeholder="flight number" required/></br>
-	<input type="submit" value=Search /></br>
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
-	<table border="1">
-	<tr>
-		<th>airline_name</th>
-		<th>flight_num</th>
-		<th>departure_airport</th>
-		<th>departure_time</th>
-		<th>arrival_airport</th>
-		<th>arrival_time</th>
-		<th>price</th>
-		<th>status</th>
-		<th>airplane_id</th>
-		<th>status</th>
-	</tr>
-	{% for dic in post %}
-	<tr>
-		<td>{{dic.airline_name}}</td>
-		<td>{{dic.flight_num}}</td>
-		<td>{{dic.departure_airport}}</td>
-		<td>{{dic.departure_time}}</td>
-		<td>{{dic.arrival_airport}}</td>
-		<td>{{dic.arrival_time}}</td>
-		<td>{{dic.price}}</td>
-		<td>{{dic.status}}</td>
-		<td>{{dic.airplane_id}}</td>
-		<td>{{dic.status}}</td>
-	</tr>
-	{% endfor %} 
+    <input type="text" name="airline name" placeholder="airline name" required/></br>
+    <input type="text" name="flight number" placeholder="flight number" required/></br>
+    <input type="submit" value=Search /></br>
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+    <table border="1">
+    <tr>
+        <th>airline_name</th>
+        <th>flight_num</th>
+        <th>departure_airport</th>
+        <th>departure_time</th>
+        <th>arrival_airport</th>
+        <th>arrival_time</th>
+        <th>price</th>
+        <th>status</th>
+        <th>airplane_id</th>
+        <th>status</th>
+    </tr>
+    {% for dic in post %}
+    <tr>
+        <td>{{dic.airline_name}}</td>
+        <td>{{dic.flight_num}}</td>
+        <td>{{dic.departure_airport}}</td>
+        <td>{{dic.departure_time}}</td>
+        <td>{{dic.arrival_airport}}</td>
+        <td>{{dic.arrival_time}}</td>
+        <td>{{dic.price}}</td>
+        <td>{{dic.status}}</td>
+        <td>{{dic.airplane_id}}</td>
+        <td>{{dic.status}}</td>
+    </tr>
+    {% endfor %} 
 </form>
 <a href="/a_search">Go back</a>
 </body>
