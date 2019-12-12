@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 
-<a href="/">Go back</a>
+<body>
+    {% if not message %}
+        <a href="/s_compyr">See report based on last year</a></br>
+        <a href="/s_compmon">See report based on last month</a></br>
+        <a href="/">Go back</a>
+    {% endif %}
+ </body>
 
-<h1>PIE CHART</h1>
+ <h1>PIE CHART</h1>
 
 {% endblock %}

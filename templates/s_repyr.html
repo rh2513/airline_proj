@@ -12,21 +12,18 @@
     {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
     {% endif %}
-    <p><strong>View top 5 customers in the past 6 months</strong></p>
-    <table border="1">
+    <p><strong>The number of tickets last year</strong></p>
+    <table border="2">
     <tr>
-        <th>Customer Email</th>
-        <th>Number of tickets</th>
+        <th>number of tickets</th>
     </tr>
     {% for dic in post %}
     <tr>
-        <td>{{dic.email}}</td>
         <td>{{dic.num}}</td>
     </tr>
     {% endfor %}
     </table>
     {{ myechart|safe }}
-    <a href="/a_best5c">Go back</a>
+    <a href="/report">Go back</a>
 </body>
-
 </html>

@@ -2,30 +2,33 @@
 <html>
 
 <head>
-
+    <meta charset="utf-8">
+    {% for jsfile_name in script_list %}
+        <script src="{{ host }}/{{ jsfile_name }}.js"></script>
+    {% endfor %}
 </head>
 
 <body>
-<form action="a_comdAuth" method="POST">
+<form action="s_repdatesAuth" method="POST">
     <input type="text" name="start" placeholder="start date" required/></br>
     <input type="text" name="end" placeholder="end date" required/></br>
     <input type="submit" value=Search /></br>
     {% if error %}
         <p class="error"><strong>Error:</strong> {{error}}</p>
     {% endif %}
+    <p><strong>The number of tickets during this time</strong></p>
     <table border="2">
     <tr>
-        <th>Total earned</th>
-        <th>Amount of tickets sold</th>
+        <th>Number of tickets</th>
     </tr>
-    {% if post %}
+    {% for dic in post %}
     <tr>
-        <td>{{post.Total}}</td>
-        <td>{{post.Amount}}</td>
+        <td>{{dic.num}}</td>
     </tr>
-    {% endif %}
+    {% endfor %}
     </table>
+    {{ myechart|safe }}
 </form>
-<a href="/a_com">Go back</a>
+<a href="/report">Go back</a>
 </body>
 </html>

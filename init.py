@@ -127,13 +127,13 @@ def customer_register():
             flash("Password must match")
             return redirect(url_for('customer_register'))
 
-            pw_hash = hashlib.md5(password.encode().hexdigest()) 
+        pw_hash = hashlib.md5(password.encode().hexdigest()) 
 
-            cursor = conn.cursor()
-            query = "SELECT * FROM customer WHERE email = \'{}\'"
-            cursor.execute(query.format(email))
-            data = cursor.fetchone()
-            error = None
+        cursor = conn.cursor()
+        query = "SELECT * FROM customer WHERE email = \'{}\'"
+        cursor.execute(query.format(email))
+        data = cursor.fetchone()
+        error = None
 
         if(data):
             error = "This user already exists"
@@ -377,9 +377,9 @@ def newFlight():
             cursor.close()
             return redirect(url_for('home'))
 
-            return render_template('staff/create_flight.html')
-            error = 'Staff does not exist'
-            return redirect(url_for('login', error=error))
+        return render_template('staff/create_flight.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/flight/<slug>')
 def lookAtFlight(slug):
@@ -476,9 +476,9 @@ def addAirplane():
             cursor.close()
             return redirect(url_for('home'))
 
-            return render_template('staff/add_airplane.html')
-            error = 'Staff does not exist'
-            return redirect(url_for('login', error=error))
+        return render_template('staff/add_airplane.html')
+    error = 'Staff does not exist'
+    return redirect(url_for('login', error=error))
 
 @app.route('/add-airport', methods=['GET','POST'])
 def addAirport():
@@ -602,6 +602,179 @@ def report():
         return render_template('staff/report.html', data=data)
     error = 'Staff does not exist'
     return redirect(url_for('login', error=error))
+@app.route('/s_repdates')
+def s_repdates():
+    return render_template('s_repdates.html')
+
+@app.route('/s_repdatesAuth', methods = ['GET', 'POST'])
+def s_repdatesAuth():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            start = request.form['start']
+            end = request.form['end']
+            cursor = conn.cursor()
+            query = 'SELECT count(ticket_id) as num FROM purchases WHERE purchase_date BETWEEN %s AND %s'
+            cursor.execute(query, (start, end))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if(data):
+                cursor = conn.cursor()
+                query = 'SELECT month(purchase_date) as month, count(ticket_id) as num FROM purchases WHERE purchase_date BETWEEN %s AND %s GROUP BY month ORDER BY month'
+                cursor.execute(query, (start, end))
+                bardata = cursor.fetchall()
+                cursor.close()
+                xbar = []
+                ybar = []
+                for dic in bardata:
+                    xbar.append(dic['month'])
+                    ybar.append(int(dic['num']))
+                bar = Bar('View report in a for this time range')
+                bar.add('Number of tickets', xbar, ybar)
+                return render_template('s_repdates.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+            else:
+                error = "No ticket available."
+                return render_template('s_repdates.html', error = error)
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
+
+@app.route('/s_repyr')
+def s_repyr():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            cursor = conn.cursor()
+            query = 'SELECT count(ticket_id) as num FROM purchases WHERE purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE()'
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if(data):
+                cursor = conn.cursor()
+                query = 'SELECT month(purchase_date) as month, count(ticket_id) as num FROM purchases WHERE purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE() GROUP BY month ORDER BY month'
+                cursor.execute(query)
+                bardata = cursor.fetchall()
+                cursor.close()
+                xbar = []
+                ybar = []
+                for dic in bardata:
+                    xbar.append(dic['month'])
+                    ybar.append(int(dic['num']))
+                bar = Bar('View report of last year')
+                bar.add('Number of tickets', xbar, ybar)
+                return render_template('s_repyr.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+            else:
+                error = "No ticket available."
+                return render_template('s_repyr.html', error = error)
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
+
+@app.route('/s_rmon')
+def s_rmon():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            cursor = conn.cursor()
+            query = 'SELECT count(ticket_id) as num FROM purchases WHERE purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE()'
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if(data):
+                return render_template('s_rmon.html', post = data)
+            else:
+                error = "No ticket available."
+                return render_template('s_rmon.html', error = error)
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
+@app.route('/s_comp')
+def s_comp():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            return render_template('revenue.html')
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
+
+@app.route('/s_compyr')
+def s_compyr():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            cursor = conn.cursor()
+            query = 'SELECT sum(price) FROM purchases, ticket, flight WHERE purchases.ticket_id = ticket.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND booking_agent_id is null AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE())'
+            cursor.execute(query)
+            direct = cursor.fetchone()
+            cursor.close()
+            cursor = conn.cursor()
+            query = 'SELECT sum(price) FROM purchases, ticket, flight WHERE purchases.ticket_id = ticket.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND booking_agent_id is not null AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE())'
+            cursor.execute(query)
+            indirect = cursor.fetchone()
+            cursor.close()
+            xpie = ['direct to customer', '3rd party']
+            ypie = []
+            print(direct, indirect)
+            for key in direct:
+                if direct[key] == None:
+                    ypie.append(0)
+                else:
+                    ypie.append(int(direct[key]))
+            for key in indirect:
+                if indirect[key] == None:
+                    ypie.append(0)
+                else:
+                    ypie.append(int(indirect[key]))
+            pie = Pie('Revenue in last year')
+            pie.add('',xpie,ypie,is_label_show = True)
+            return render_template('s_compyr.html', myechart = pie.render_embed(), host = REMOTE_HOST, script_list=pie.get_js_dependencies())
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
+
+@app.route('/s_compmon')
+def s_compmon():
+    try:
+        usertype = session['type']
+        if usertype == "staff":
+            cursor = conn.cursor()
+            query = 'SELECT sum(price) FROM purchases, ticket, flight WHERE purchases.ticket_id = ticket.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND booking_agent_id is null AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE())'
+            cursor.execute(query)
+            direct = cursor.fetchone()
+            cursor.close()
+            cursor = conn.cursor()
+            query = 'SELECT sum(price) FROM purchases, ticket, flight WHERE purchases.ticket_id = ticket.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND booking_agent_id is not null AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE())'
+            cursor.execute(query)
+            indirect = cursor.fetchone()
+            cursor.close()
+            xpie = ['direct to customer', '3rd party']
+            ypie = []
+            for key in direct:
+                if direct[key] == None:
+                    ypie.append(0)
+                else:
+                    ypie.append(int(direct[key]))
+            for key in indirect:
+                if indirect[key] == None:
+                    ypie.append(0)
+                else:
+                    ypie.append(int(indirect[key]))
+            pie = Pie('Revenue in last month')
+            pie.add('',xpie,ypie,is_label_show = True)
+            return render_template('s_compmon.html', myechart = pie.render_embed(), host = REMOTE_HOST, script_list=pie.get_js_dependencies())
+        else:
+            return render_template('error.html')
+    except KeyError:
+        return render_template('error.html')
 
 @app.route('/revenue', methods=['GET','POST'])
 def revenue():
@@ -792,258 +965,258 @@ def c_detailsAuth():
 # AGENT
 @app.route('/a_view')
 def a_view():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			cursor = conn.cursor()
-			query = 'SELECT customer_email, airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases natural join booking_agent WHERE email = %s AND status = "upcoming"'
-			cursor.execute(query, (username))
-			data = cursor.fetchall()
-			cursor.close()
-			error = None
-			if (data):
-				return render_template('a_view.html', post = data)
-			else:
-				error = "No flights purchased for customers."
-				return render_template('a_view.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            cursor = conn.cursor()
+            query = 'SELECT customer_email, airline_name, flight_num, ticket_id, departure_airport, departure_time, arrival_airport, arrival_time, price, airplane_id FROM flight natural join ticket natural join purchases natural join booking_agent WHERE email = %s AND status = "upcoming"'
+            cursor.execute(query, (username))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if (data):
+                return render_template('a_view.html', post = data)
+            else:
+                error = "No flights purchased for customers."
+                return render_template('a_view.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_search')
 def a_search():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			return render_template('a_search.html')
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            return render_template('a_search.html')
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_searchAuth', methods = ['GET','POST'])
 def a_searchAuth():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			source = request.form['source']
-			destination = request.form['destination']
-			date = request.form['date']
-			cursor = conn.cursor()
-			query = "SELECT flight.* FROM flight, airport as T1, airport as T2 WHERE departure_airport = T1.airport_name and arrival_airport = T2.airport_name and status = 'upcoming' and (departure_airport = %s or T1.airport_city = %s) and (arrival_airport = %s or T2.airport_city = %s) and date(departure_time) = %s"
-			cursor.execute(query, (source, source, destination, destination, date))
-			data = cursor.fetchall()
-			cursor.close()
-			error = None
-			if (data):
-				return render_template('a_purchase.html', post = data)
-			else:
-				error = "Flight does not exist"
-				return render_template("a_search.html", error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            source = request.form['source']
+            destination = request.form['destination']
+            date = request.form['date']
+            cursor = conn.cursor()
+            query = "SELECT flight.* FROM flight, airport as T1, airport as T2 WHERE departure_airport = T1.airport_name and arrival_airport = T2.airport_name and status = 'upcoming' and (departure_airport = %s or T1.airport_city = %s) and (arrival_airport = %s or T2.airport_city = %s) and date(departure_time) = %s"
+            cursor.execute(query, (source, source, destination, destination, date))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if (data):
+                return render_template('a_purchase.html', post = data)
+            else:
+                error = "Flight does not exist"
+                return render_template("a_search.html", error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_purchase')
 def a_purchase():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			return render_template('a_purchase.html')
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
-	
+    
+        usertype = session['type']
+        if usertype == "agent":
+            return render_template('a_purchase.html')
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
+    
 @app.route('/a_purchaseAuth', methods = ['GET', 'POST'])
 def a_purchaseAuth():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			airline_name = request.form['airline name']
-			flight_num = request.form['flight number']
-			cursor = conn.cursor()
-			query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s and ticket_id not in (SELECT ticket_id from purchases)'
-			cursor.execute(query, (airline_name, flight_num))
-			data = cursor.fetchone()
-			cursor.close()
-			error = None
-			if(data):
-				return render_template('a_success.html', post = data)
-			else:
-				error = "No tickets left"
-				return render_template('a_purchase.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            airline_name = request.form['airline name']
+            flight_num = request.form['flight number']
+            cursor = conn.cursor()
+            query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s and ticket_id not in (SELECT ticket_id from purchases)'
+            cursor.execute(query, (airline_name, flight_num))
+            data = cursor.fetchone()
+            cursor.close()
+            error = None
+            if(data):
+                return render_template('a_success.html', post = data)
+            else:
+                error = "No tickets left"
+                return render_template('a_purchase.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_success')
 def a_buy():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			return render_template('a_success.html')
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            return render_template('a_success.html')
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_successAuth', methods = ['GET', 'POST'])
 def a_successAuth():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			cursor = conn.cursor()
-			query = 'SELECT booking_agent_id FROM booking_agent WHERE email = %s'
-			cursor.execute(query, (username))
-			data = cursor.fetchone()
-			cursor.close()
-			booking_agent_id = data['booking_agent_id']
-			ticket_id = request.form['ticket id']
-			customer = request.form['customer']
-			cursor = conn.cursor()
-			query = 'INSERT INTO purchases values (%s, %s, %s, CURRENT_DATE())'
-			cursor.execute(query, (ticket_id, customer, booking_agent_id))
-			conn.commit()
-			cursor.close()
-			return render_template('\.html', post = "Successful!")
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            cursor = conn.cursor()
+            query = 'SELECT booking_agent_id FROM booking_agent WHERE email = %s'
+            cursor.execute(query, (username))
+            data = cursor.fetchone()
+            cursor.close()
+            booking_agent_id = data['booking_agent_id']
+            ticket_id = request.form['ticket id']
+            customer = request.form['customer']
+            cursor = conn.cursor()
+            query = 'INSERT INTO purchases values (%s, %s, %s, CURRENT_DATE())'
+            cursor.execute(query, (ticket_id, customer, booking_agent_id))
+            conn.commit()
+            cursor.close()
+            return render_template('\.html', post = "Successful!")
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_com')
 def a_commission():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			cursor = conn.cursor()
-			query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount, 0.1 * sum(price)/count(ticket_id) as Average FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE())"
-			cursor.execute(query, (username))
-			data = cursor.fetchone()
-			conn.commit()
-			cursor.close()
-			error = None
-			if(data):
-				return render_template('a_com.html', post = data)
-			else:
-				error = "No commission yet, try harder."
-				return render_template('a_com.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            cursor = conn.cursor()
+            query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount, 0.1 * sum(price)/count(ticket_id) as Average FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 MONTH) AND CURRENT_DATE())"
+            cursor.execute(query, (username))
+            data = cursor.fetchone()
+            conn.commit()
+            cursor.close()
+            error = None
+            if(data):
+                return render_template('a_com.html', post = data)
+            else:
+                error = "No commission yet, try harder."
+                return render_template('a_com.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_comdetail')
 def a_commissiondetail():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			return render_template('a_comdetail.html')
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            return render_template('a_comdetail.html')
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_comdAuth', methods = ['GET', 'POST'])
 def a_comdAuth():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			start = request.form['start date']
-			end = request.form['end date']
-			cursor = conn.cursor()
-			query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN %s AND %s)"
-			cursor.execute(query, (username, start, end))
-			data = cursor.fetchone()
-			conn.commit()
-			cursor.close()
-			error = None
-			if(data):
-				return render_template('a_comdetail.html', post = data)
-			else:
-				error = "No commission yet. Try harder..."
-				return render_template('a_comdetail.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            start = request.form['start date']
+            end = request.form['end date']
+            cursor = conn.cursor()
+            query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN %s AND %s)"
+            cursor.execute(query, (username, start, end))
+            data = cursor.fetchone()
+            conn.commit()
+            cursor.close()
+            error = None
+            if(data):
+                return render_template('a_comdetail.html', post = data)
+            else:
+                error = "No commission yet. Try harder..."
+                return render_template('a_comdetail.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_best5c')
 def a_top():
-	
-		usertype = session['type']
-		if usertype == "agent":
-			return render_template('a_best5c.html')
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        usertype = session['type']
+        if usertype == "agent":
+            return render_template('a_best5c.html')
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_bestmonth')
 def a_topmonth():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			cursor = conn.cursor()
-			query = "SELECT customer_email as email, count(ticket_id) as num FROM purchases, booking_agent WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 6 MONTH) AND CURRENT_DATE())  GROUP BY customer_email ORDER BY count(ticket_id) DESC LIMIT 5"
-			cursor.execute(query, (username))
-			data = cursor.fetchall()
-			cursor.close()
-			error = None
-			if (data):
-				bar = Bar('View top Customers in the past 6 months')
-				xbar = []
-				ybar =[]
-				for dic in data:
-					xbar.append(dic['email'])
-					ybar.append(int(dic['num']))
-				bar.add('ticket number',xbar,ybar)
-				return render_template('a_bestmonth.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
-			else:
-				error = "No customer data available."
-				return render_template('a_bestmonth.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            cursor = conn.cursor()
+            query = "SELECT customer_email as email, count(ticket_id) as num FROM purchases, booking_agent WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 6 MONTH) AND CURRENT_DATE())  GROUP BY customer_email ORDER BY count(ticket_id) DESC LIMIT 5"
+            cursor.execute(query, (username))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if (data):
+                bar = Bar('View top Customers in the past 6 months')
+                xbar = []
+                ybar =[]
+                for dic in data:
+                    xbar.append(dic['email'])
+                    ybar.append(int(dic['num']))
+                bar.add('ticket number',xbar,ybar)
+                return render_template('a_bestmonth.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+            else:
+                error = "No customer data available."
+                return render_template('a_bestmonth.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 @app.route('/a_bestyear')
 def a_topyear():
-	
-		username = session['email']
-		usertype = session['type']
-		if usertype == "agent":
-			cursor = conn.cursor()
-			query = "SELECT customer_email as email, sum(price) * 0.1 as commission FROM purchases, booking_agent, flight, ticket WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND ticket.ticket_id = purchases.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE()) GROUP BY customer_email ORDER BY sum(price) * 0.1 DESC LIMIT 5"
-			cursor.execute(query, (username))
-			data = cursor.fetchall()
-			cursor.close()
-			error = None
-			if (data):
-				bar = Bar('View top Customers in the last year')
-				xbar = []
-				ybar =[]
-				for dic in data:
-					xbar.append(dic['email'])
-					ybar.append(int(dic['commission']))
-				bar.add('commission',xbar,ybar)
-				return render_template('a_bestyear.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
-			else:
-				error = "No customer data available"
-				return render_template('a_bestyear.html', error = error)
-		else:
-			return render_template('error.html')
-	
-		return render_template('error.html')
+    
+        username = session['email']
+        usertype = session['type']
+        if usertype == "agent":
+            cursor = conn.cursor()
+            query = "SELECT customer_email as email, sum(price) * 0.1 as commission FROM purchases, booking_agent, flight, ticket WHERE purchases.booking_agent_id = booking_agent.booking_agent_id AND ticket.ticket_id = purchases.ticket_id AND ticket.airline_name = flight.airline_name AND ticket.flight_num = flight.flight_num AND email = %s AND (purchase_date BETWEEN DATE_SUB(CURRENT_DATE(),INTERVAL 1 YEAR) AND CURRENT_DATE()) GROUP BY customer_email ORDER BY sum(price) * 0.1 DESC LIMIT 5"
+            cursor.execute(query, (username))
+            data = cursor.fetchall()
+            cursor.close()
+            error = None
+            if (data):
+                bar = Bar('View top Customers in the last year')
+                xbar = []
+                ybar =[]
+                for dic in data:
+                    xbar.append(dic['email'])
+                    ybar.append(int(dic['commission']))
+                bar.add('commission',xbar,ybar)
+                return render_template('a_bestyear.html', post = data, myechart = bar.render_embed(), host = REMOTE_HOST, script_list=bar.get_js_dependencies())
+            else:
+                error = "No customer data available"
+                return render_template('a_bestyear.html', error = error)
+        else:
+            return render_template('error.html')
+    
+        return render_template('error.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,25 +1,16 @@
-{% extends "base.html" %}
-{% block content %}
+<!DOCTYPE html>
+<html>
 
 <a href="/">Go back</a>
 
 <h1>REPORT</h1>
 
-<div class="jumbotron">
-    <h3>SELECT A RANGE OF DATE</h3>
-    <form method="POST" action="/report" class="form-inline active-purple-4">
-        <input class="form-control form-control-sm mr-3" type="date" placeholder="Start" aria-label="Search">
-        <input class="form-control form-control-sm mr-3" type="date" placeholder="End" aria-label="Search">
-        <button class="btn"> Search </button>
-    </form>
-
-    {% if data %}
-    <br />
-    <h4>Total between this date range: {{ data }}</h4>
+<body>
+    {% if not message %}
+        <a href="/s_repdates">See report based on range of dates</a></br>
+        <a href="/s_repyr">See report based on last year</a></br>
+        <a href="/s_rmon">See report based on last month</a></br>
+        <a href="/">Go back</a>
     {% endif %}
-</div>
-
-<div class="jumbotron">
-    <h3>MONTHLY REPORT</h3>
-    // BAR CHART
-</div>{% endblock %}
+ </body>
+ </html>
