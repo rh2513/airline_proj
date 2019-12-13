@@ -861,9 +861,12 @@ def c_purchase():
 def c_buyAuth():
     username = session['email']
     usertype = session['type']
+    print(usertype)
     if (usertype == "customer"):
         airline_name = request.form['airline']
         flight_num = request.form['flight_num']
+        print(airline_name)
+
         cursor = conn.cursor()
         query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s'
         cursor.execute(query, (airline_name, flight_num))
@@ -1027,7 +1030,6 @@ def a_purchase():
 	
 		return render_template('error.html')
 	
-# ******** LOOK BACK **********
 @app.route('/a_purchaseAuth', methods = ['GET', 'POST'])
 def a_purchaseAuth():
 	
@@ -1036,7 +1038,7 @@ def a_purchaseAuth():
 			airline_name = request.form['airline name']
 			flight_num = request.form['flight number']
 			cursor = conn.cursor()
-			query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s and ticket_id not in (SELECT ticket_id from purchases)'
+			query = 'SELECT ticket_id FROM ticket WHERE airline_name = %s and flight_num = %s'
 			cursor.execute(query, (airline_name, flight_num))
 			data = cursor.fetchone()
 			cursor.close()
@@ -1128,8 +1130,8 @@ def a_comdAuth():
     username = session['email']
     usertype = session['type']
     if usertype == "agent":
-        start = request.form['start date']
-        end = request.form['end date']
+        start = request.form['start']
+        end = request.form['end']
         cursor = conn.cursor()
         query = "SELECT 0.1 * sum(price) as Total, count(ticket_id) as Amount FROM purchases natural join ticket natural join flight natural join booking_agent WHERE email = %s AND (purchase_date BETWEEN %s AND %s)"
         cursor.execute(query, (username, start, end))
