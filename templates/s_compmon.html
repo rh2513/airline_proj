@@ -2,17 +2,17 @@
 <html>
 
 <head>
-	<meta charset="utf-8">
+    <meta charset="utf-8">
     {% for jsfile_name in script_list %}
         <script src="{{ host }}/{{ jsfile_name }}.js"></script>
     {% endfor %}
 </head>
 
 <body>
-	{% if error %}
-		<p class="error"><strong>Error:</strong> {{error}}</p>
-	{% endif %}
-	{{ myechart|safe }}
-	<a href="/revenue">Go back</a>
+    {% if error %}
+        <p class="error"><strong>Error:</strong> {{error}}</p>
+    {% endif %}
+    {{ myechart|safe }}
+    <a href="/revenue">Go back</a>
 </body>
 </html>
